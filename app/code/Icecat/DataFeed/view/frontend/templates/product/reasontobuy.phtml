@@ -1,0 +1,6 @@
+<?php
+use Icecat\DataFeed\Model\AttributeCodes;
+
+$product = $block->getProduct();
+?>
+<?php echo $product->getData(AttributeCodes::ICECAT_PRODUCT_ATTRIBUTE_REASON_TO_BUY); ?>

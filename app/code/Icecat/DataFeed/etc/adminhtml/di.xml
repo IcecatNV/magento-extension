@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+/**
+ * @author Bartosz Kubicki <bartosz.kubicki@lizardmedia.pl>
+ * @copyright Copyright (C) 2018 Lizard Media (http://lizardmedia.pl)
+ */
+-->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <virtualType name="Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\Pool">
+        <arguments>
+            <argument name="modifiers" xsi:type="array">
+                <item name="icecat_product_attachment" xsi:type="array">
+                    <item name="class" xsi:type="string">Icecat\DataFeed\Ui\DataProvider\Product\Form\Modifier\CustomTab</item>
+                    <item name="sortOrder" xsi:type="number">10</item>
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\Pool">
+        <arguments>
+            <argument name="modifiers" xsi:type="array">
+                <item name="icecat_product_review" xsi:type="array">
+                    <item name="class" xsi:type="string">Icecat\DataFeed\Ui\DataProvider\Product\Form\Modifier\ReviewTab</item>
+                    <item name="sortOrder" xsi:type="number">10</item>
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\Pool">
+        <arguments>
+            <argument name="modifiers" xsi:type="array">
+                <item name="icecat_product_review" xsi:type="array">
+                    <item name="class" xsi:type="string">Icecat\DataFeed\Ui\DataProvider\Product\Form\Modifier\ReviewTab</item>
+                    <item name="sortOrder" xsi:type="number">10</item>
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="icecat_queue_report_listing_data_source" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueue\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueue\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">icecat_datafeed_queue</argument>
+            <argument name="resourceModel" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueue</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="icecat_queue_log_report_listing_data_source" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueueLog\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueueLog\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">icecat_datafeed_queue_log</argument>
+            <argument name="resourceModel" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueueLog</argument>
+        </arguments>
+    </virtualType>
+</config>
