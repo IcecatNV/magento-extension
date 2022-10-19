@@ -1,0 +1,499 @@
+<?php
+declare(strict_types=1);
+
+namespace Icecat\DataFeed\Model;
+
+use Icecat\DataFeed\Helper\Data;
+use Icecat\DataFeed\Service\IcecatApiService;
+use Magento\Catalog\Model\Product\Gallery\Processor;
+use Magento\Catalog\Model\ProductRepository;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\ObjectManagerInterface;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Zend_Db_Expr;
+use Zend_Db_Statement_Exception;
+
+class Queue
+{
+    public const UNLOCK_STACKED_JOBS_AFTER_MINUTES = 15;
+    public const CLEAR_ARCHIVE_LOGS_AFTER_DAYS = 30;
+
+    /**
+     * @var CollectionFactory
+     */
+    private $collectionFactory;
+
+    /**
+     * @var AdapterInterface
+     * */
+    private $db;
+
+    /**
+     * @var string
+     * */
+    private $table;
+
+    /** @var string */
+    private $logTable;
+
+    /** @var string */
+    private $archiveTable;
+
+    /** @var array */
+    private $logRecord;
+
+    /** @var ConsoleOutput  */
+    private $output;
+
+    /** @var Data  */
+    private $data;
+
+    /** @var ProductRepository  */
+    private $productRepository;
+
+    /** @var IcecatApiService  */
+    private $icecatApiService;
+
+    /** @var IceCatUpdateProduct  */
+    private $iceCatUpdateProduct;
+
+    /** @var Processor  */
+    private $processor;
+
+    /** @var int */
+    private $noOfFailedJobs = 0;
+
+
+    /**
+     * @param CollectionFactory $collectionFactory
+     * @param ResourceConnection $resourceConnection
+     * @param ObjectManagerInterface $objectManager
+     * @param ConsoleOutput $output
+     * @param Data $data
+     * @param ProductRepository $productRepository
+     * @param IcecatApiService $icecatApiService
+     * @param IceCatUpdateProduct $iceCatUpdateProduct
+     * @param Processor $processor
+     */
+    public function __construct(
+        CollectionFactory $collectionFactory,
+        ResourceConnection $resourceConnection,
+        ObjectManagerInterface $objectManager,
+        ConsoleOutput $output,
+        Data $data,
+        ProductRepository $productRepository,
+        IcecatApiService $icecatApiService,
+        IceCatUpdateProduct $iceCatUpdateProduct,
+        Processor $processor
+    ) {
+        $this->collectionFactory = $collectionFactory;
+        $this->table = $resourceConnection->getTableName('icecat_datafeed_queue');
+        $this->archiveTable = $resourceConnection->getTableName('icecat_datafeed_queue_archive');
+        $this->logTable = $resourceConnection->getTableName('icecat_datafeed_queue_log');
+        $this->schedulerTable = $resourceConnection->getTableName('icecat_queue_scheduler');
+        $this->db = $objectManager->create(ResourceConnection::class)->getConnection('core_write');
+        $this->output = $output;
+        $this->data = $data;
+        $this->productRepository = $productRepository;
+        $this->icecatApiService = $icecatApiService;
+        $this->iceCatUpdateProduct = $iceCatUpdateProduct;
+        $this->processor = $processor;
+    }
+
+    public function addJobToQueue()
+    {
+        $productCollection = $this->getProductCollections();
+        $productCollection->getSelect()->reset(\Zend_Db_Select::COLUMNS);
+        $productCollection->getSelect()->columns('entity_id');
+        $collection1Ids = $productCollection->getAllIds();
+        sort($collection1Ids);
+        $chunkedArray = array_chunk($collection1Ids, 50);
+        foreach ($chunkedArray as $productids) {
+            $this->db->insert($this->table, [
+                'created' => date('Y-m-d H:i:s'),
+                'pid' => null,
+                'data' => implode(',', $productids),
+                'data_size' => count($productids)
+            ]);
+        }
+
+        return true;
+    }
+
+    public function addNewProductToQueue()
+    {
+        $schedulerDetails       = $this->getSchedulerId();
+        if (empty($schedulerDetails) && empty($schedulerDetails['ended'])) {
+            $productCollection  = $this->getProductCollections();
+        } else {
+            $productCollection  = $this->getNewProductsCollections($schedulerDetails['ended']);
+        }
+        $productCollection->getSelect()->reset(\Zend_Db_Select::COLUMNS);
+        $productCollection->getSelect()->columns('entity_id');
+        $collection1Ids = $productCollection->getAllIds();
+        sort($collection1Ids);
+        $chunkedArray = array_chunk($collection1Ids, 50);
+        foreach ($chunkedArray as $productids) {
+            $this->db->insert($this->table, [
+                'created' => date('Y-m-d H:i:s'),
+                'pid' => null,
+                'data' => implode(',', $productids),
+                'data_size' => count($productids)
+            ]);
+        }
+        return true;
+    }
+
+    public function runCron($uniqueScheduledId)
+    {
+        $this->clearOldArchiveRecords();
+        $this->unlockStackedJobs();
+        $this->logRecord = [
+            'started' => date('Y-m-d H:i:s'),
+            'processed_jobs' => 0
+        ];
+
+        $started = time();
+
+        $this->run(5, $uniqueScheduledId);
+
+        $this->logRecord['duration'] = time() - $started;
+
+        if (php_sapi_name() === 'cli') {
+            $this->output->writeln(
+                $this->logRecord['processed_jobs'] . ' jobs processed in ' . $this->logRecord['duration'] . ' seconds.'
+            );
+        }
+    }
+
+    private function clearOldArchiveRecords()
+    {
+        $archiveLogClearLimit = self::CLEAR_ARCHIVE_LOGS_AFTER_DAYS;
+        $this->db->delete(
+            $this->archiveTable,
+            'created_at < (NOW() - INTERVAL ' . $archiveLogClearLimit . ' DAY)'
+        );
+    }
+
+    private function unlockStackedJobs()
+    {
+        $this->db->update($this->table, [
+            'locked_at' => null,
+            'pid' => null,
+        ], ['locked_at < (NOW() - INTERVAL ' . self::UNLOCK_STACKED_JOBS_AFTER_MINUTES . ' MINUTE)']);
+    }
+
+    /**
+     * @return mixed
+     */
+    private function getProductCollections()
+    {
+        $collection = $this->collectionFactory
+            ->create();
+        return $collection;
+    }
+
+    private function getNewProductsCollections($cronLastUpdated)
+    {
+        $collection = $this->collectionFactory
+            ->create();
+        $collection->addAttributeToFilter('updated_at', array('gteq' => $cronLastUpdated));
+        return $collection;
+    }
+
+    private function getNewProductCollections()
+    {
+        $collection = $this->collectionFactory
+            ->create();
+        $collection->addAttributeToFilter('icecat_updated_time', array('null' => true));
+        return $collection;
+    }
+
+    public function run($maxJobs, $uniqueScheduledId)
+    {
+        $this->clearOldFailingJobs();
+
+        $jobs = $this->getJobs($maxJobs);
+
+        if ($jobs === []) {
+            return;
+        }
+        // Run all reserved jobs
+        foreach ($jobs as $job) {
+            try {
+                $iceCatLogArray = [
+                    'job_id' => $job['job_id'],
+                    'started' => date('Y-m-d H:i:s'),
+                ];
+                $productIds = explode(',', $job['data']);
+                $productWithOutGtinAndProductCodeAndBrandCode = [];
+                $errorProductIds = [];
+                $successProducts = [];
+                $errorLog  = [];
+                $started = time();
+                foreach ($productIds as $productId) {
+                    $icecatStores = $this->data->getIcecatStoreConfig();
+                    $storeArray = explode(',', $icecatStores);
+                    $storeArrayForImage = explode(',', $icecatStores);
+                    //$storeArray[] = 0; // Admin store
+                    $storeArrayForImage[] = 0; // Admin store
+                    $updatedStore = array();
+                    $errorMessage = null;
+                    $globalImageArray = [];
+                    foreach ($storeArrayForImage as $store) {
+                        if ($this->data->isImportImagesEnabled()) {
+                            $product = $this->productRepository->getById($productId, false, $store);
+                            $images = $product->getMediaGalleryImages();
+                            $mediaTypeArray = array('image', 'small_image', 'thumbnail');
+                            $this->processor->clearMediaAttribute($product, $mediaTypeArray);
+                            $existingMediaGalleryEntries = $product->getMediaGalleryEntries();
+                            foreach ($existingMediaGalleryEntries as $key => $entry) {
+                                unset($existingMediaGalleryEntries[$key]);
+                            }
+                            $product->setMediaGalleryEntries($existingMediaGalleryEntries);
+                            foreach ($images as $child) {
+                                $this->processor->removeImage($product, $child->getFile());
+                            }
+                            $this->productRepository->save($product);
+                        }
+                    }
+                    foreach ($storeArray as $store) {
+                        $product = $this->productRepository->getById($productId, false, $store);
+                        $language = $this->data->getStoreLanguage($store);
+                        $icecatUri = $this->data->getIcecatUri($product, $language);
+                        if ($icecatUri) {
+                            $response = $this->icecatApiService->execute($icecatUri);
+                            if (!empty($response) && !empty($response['Code'])) {
+                                $errorMessage       = $this->errorMessageResponse($response, $product);
+                                $errorProductIds[]  = $productId;
+                                $errorLog['Product ID-'.$productId] = $errorMessage;
+                            } else {
+                                $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store);
+                                $successProducts[] = $productId;
+                            }
+                        } else {
+                            $productWithOutGtinAndProductCodeAndBrandCode[] = $productId;
+                        }
+                    }
+                    if ($this->columnExists === false) {
+                        $query = "select * from " . $this->galleryEntitytable. " A left join ". $this->galleryTable. " B on B.value_id = A.value_id where A.row_id=".$productId. " and B.media_type='image'";
+                    } else {
+                        $query = "select * from " . $this->galleryEntitytable. " A left join ". $this->galleryTable. " B on B.value_id = A.value_id where A.entity_id=".$productId. " and B.media_type='image'";
+                    }
+                    $data = $this->db->query($query)->fetchAll();
+                    foreach ($globalImageArray as $key => $imageArray) {
+                        foreach ($imageArray as $image) {
+                            $imageData = explode('.', $image);
+                            $imageName = $imageData[0];
+                            foreach ($data as $k => $value) {
+                                if ($key != $value['store_id']) {
+                                    if (strpos($value['value'], $imageName) !== false) {
+                                        $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=".$value['store_id'];
+                                        $this->db->query($updateQuery);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                $iceCatLogArray['duration'] = time() - $started;
+                $iceCatLogArray['ended'] = date('Y-m-d H:i:s');
+                $iceCatLogArray['imported_record'] = count(array_unique($successProducts));
+                $iceCatLogArray['unsuccessful_record'] = count(array_unique($errorProductIds)) + count(array_unique($productWithOutGtinAndProductCodeAndBrandCode));
+                $iceCatLogArray['product_ids'] = implode(',', array_unique($errorProductIds));
+                $iceCatLogArray['product_ids_with_missing_gtin_product_code'] = implode(',', array_unique($productWithOutGtinAndProductCodeAndBrandCode));
+                $iceCatLogArray['error_log'] = json_encode($errorLog);
+                $iceCatLogArray['schedule_unique_id'] = $uniqueScheduledId;
+
+                // Delete one by one
+                $this->db->delete($this->table, ['job_id IN (?)' => $job['job_id']]);
+
+                $this->db->insert($this->logTable, $iceCatLogArray);
+                $this->logRecord['processed_jobs'] += 1;
+            } catch (\Exception $e) {
+                $logMessage = date('c') . ' ERROR: ' . get_class($e) . ':
+                    ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() .
+                    "\nStack trace:\n" . $e->getTraceAsString();
+
+                $this->db->update($this->table, [
+                    'pid' => null,
+                    'retries' => new Zend_Db_Expr('retries + 1'),
+                    'error_log' => $logMessage,
+                ], ['job_id IN (?)' => $job['job_id']]);
+
+                if (php_sapi_name() === 'cli') {
+                    $this->output->writeln($logMessage);
+                }
+            }
+        }
+    }
+
+    private function errorMessageResponse($response, $product)
+    {
+        switch ($response['Code']) {
+            case '400':
+                $gtinAttribute          = $this->data->getGTINCode();
+                $message                = 'The GTIN can not be found';
+                return[
+                    'message'           => $message,
+                    'gtin'              => $product->getData()[$gtinAttribute],
+                    'brand'             => null,
+                    'product_code'      => null
+                ];
+                break;
+            case '404':
+                $brandNameAttribute     = $this->data->getBrandCode();
+                $productCodeAttribute   = $this->data->getProductCode();
+                $message                = 'The requested product is not present in the Icecat database';
+                return[
+                    'message'           => $message,
+                    'gtin'              => null,
+                    'brand'             => $product->getData()[$brandNameAttribute],
+                    'product_code'      => $product->getData()[$productCodeAttribute]
+                ];
+                break;
+            default:
+                return[
+                    'message'           => $response['Message'],
+                    'gtin'              => null,
+                    'brand'             => null,
+                    'product_code'      => null
+                ];
+                break;
+        }
+    }
+
+    private function clearOldFailingJobs()
+    {
+        $retryLimit = 3;
+
+        if ($retryLimit > 0) {
+            $where = $this->db->quoteInto('retries >= ?', $retryLimit);
+            $this->archiveFailedJobs($where);
+
+            return;
+        }
+
+        $this->archiveFailedJobs('retries > max_retries');
+        $this->db->delete($this->table, 'retries > max_retries');
+    }
+
+    /**
+     * @param string $whereClause
+     */
+    private function archiveFailedJobs($whereClause)
+    {
+        $select = $this->db->select()
+            ->from($this->table, ['pid', 'data', 'error_log', 'data_size', 'NOW()'])
+            ->where($whereClause);
+
+        $query = $this->db->insertFromSelect(
+            $select,
+            $this->archiveTable,
+            ['pid', 'data', 'error_log', 'data_size', 'created_at']
+        );
+
+        $this->db->query($query);
+    }
+
+    /**
+     * @param int $maxJobs
+     *
+     * @throws Exception
+     *
+     * @return mixed
+     *
+     */
+    private function getJobs($maxJobs)
+    {
+        try {
+            $this->db->beginTransaction();
+            $jobs = $this->fetchJobs($maxJobs);
+            $this->lockJobs($jobs);
+            $this->db->commit();
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+
+        return $jobs;
+    }
+
+    /**
+     * @param $jobLimit
+     * @return array
+     * @throws \Zend_Db_Statement_Exception
+     */
+    private function fetchJobs($jobLimit)
+    {
+        $query = $this->db->select()
+            ->from($this->table, '*')
+            ->limit($jobLimit)
+            ->order('job_id ASC');
+        return $this->db->query($query)->fetchAll();
+    }
+
+    private function lockJobs(array $jobs)
+    {
+        $jobsIds = $this->getJobsIds($jobs);
+
+        if ($jobsIds !== []) {
+            $pid = getmypid();
+            $this->db->update($this->table, [
+                'locked_at' => date('Y-m-d H:i:s'),
+                'pid' => $pid,
+            ], ['job_id IN (?)' => $jobsIds]);
+        }
+    }
+
+    private function getJobsIds(array $jobs)
+    {
+        $jobsIds = [];
+        foreach ($jobs as $job) {
+            $jobsIds[] = $job['job_id'];
+        }
+        return $jobsIds;
+    }
+
+    /**
+     * @return int|void
+     * @throws Zend_Db_Statement_Exception
+     */
+    public function getPendingQueueJobs()
+    {
+        $query = $this->db->select()
+            ->from($this->table, '*');
+        $data = $this->db->query($query)->fetchAll();
+        return count($data);
+    }
+
+    /**
+     * @return array
+     * @throws Zend_Db_Statement_Exception
+     */
+    public function getStatistics($uniqueScheduledId)
+    {
+        $query = $this->db->select()
+            ->from($this->logTable, '*')
+            ->order('job_id ASC')
+            ->where('schedule_unique_id=?', $uniqueScheduledId);
+        return $this->db->query($query)->fetchAll();
+    }
+
+    public function getSchedulerId()
+    {
+        $query = $this->db->select()
+            ->from($this->schedulerTable, '*')
+            ->limit(1)
+            ->order('ended DESC');
+        return $this->db->query($query)->fetch();
+    }
+
+    public function getTimezone()
+    {
+        $timezone = $this->data->getTimezone();
+        return $timezone;
+    }
+}

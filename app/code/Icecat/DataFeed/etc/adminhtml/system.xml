@@ -1,0 +1,205 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="icecat" translate="label" sortOrder="40">
+            <label>Icecat</label>
+        </tab>
+        <section id="datafeed" showInDefault="1" showInWebsite="0" showInStore="0" sortOrder="10" translate="label">
+            <class>separator-top</class>
+            <label>Import Configuration</label>
+            <tab>icecat</tab>
+            <resource>Icecat_DataFeed::datafeed_configuration</resource>
+            <!-- General Configuration -->
+            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>General Configuration</label>
+                <field id="enable" type="select" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+            </group>
+            <!-- End General Configuration -->
+            <!-- Auth Configuraiton -->
+            <group id="authentication" translate="label" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>User Authentication</label>
+                <field id="authenticate" translate="label" type="label" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Status</label>
+                    <frontend_model>Icecat\DataFeed\Block\Adminhtml\System\Config\Authenticate</frontend_model>
+                </field>
+                <field id="username" type="text" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>User Name</label>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="password" type="password" translate="label" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Password</label>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="access_token" type="password" translate="label" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Access Token</label>
+                    <validate>required-entry</validate>
+                    <comment>
+                        <![CDATA[ <p><a href="https://icecat.biz/en/registration" target="_blank">Register with Icecat</a></p> <p><a href="https://icecat.biz/forgot" target="_blank">Forget Password</a></p> <p><a href="https://icecat.biz/mk/menu/contacts/index.html" target="_blank">Contact Us</a></p> ]]>
+                    </comment>
+                </field>
+            </group>
+            <!-- End Auth Configuration -->
+            <!-- Store Configuration  -->
+            <group id="icecat_store_config" translate="label" type="text" sortOrder="40" showInDefault="1">
+                <label>Store Configuration</label>
+                <field id="stores" translate="label" type="multiselect" sortOrder="5" showInDefault="1">
+                    <label>Select Store(s)</label>
+                    <source_model>Icecat\DataFeed\Model\Config\Source\Stores</source_model>
+                    <validate>required-entry</validate>
+                    <comment>Please select one or more store(s)</comment>
+                </field>
+            </group>
+            <!-- End Store Configuration -->
+            <!-- Icecat Configuration -->
+            <group id="icecat_config" translate="label" type="text" sortOrder="50" showInDefault="1">
+                <label>Icecat Configuration</label>
+                <field id="gtin" type="select" translate="label" showInDefault="1" sortOrder="1">
+                    <label>GTIN</label>
+                    <source_model>Icecat\DataFeed\Model\Config\Source\ProductAttributeDropDown</source_model>
+                    <config_path>datafeed/gtin_fetch_type/gtin</config_path>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="brand" type="select" translate="label" showInDefault="1" sortOrder="2">
+                    <label>Brand Name</label>
+                    <source_model>Icecat\DataFeed\Model\Config\Source\ProductAttributeDropDown</source_model>
+                    <config_path>datafeed/product_brand_fetch_type/brand</config_path>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="product_code" type="select" translate="label" showInDefault="1" sortOrder="3">
+                    <label>Product Code</label>
+                    <source_model>Icecat\DataFeed\Model\Config\Source\ProductAttributeDropDown</source_model>
+                    <config_path>datafeed/product_brand_fetch_type/product_code</config_path>
+                    <validate>required-entry</validate>
+                </field>
+            </group>
+            <!-- End Icecat Configuration -->
+            <!-- Product Attribute Configuration  -->
+            <group id="product_attributes" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Icecat Attributes Mapping</label>
+                <group id="icecat_categorization" translate="label" type="text" sortOrder="1" showInDefault="1">
+                    <label>Icecat Categorization</label>
+                    <field id="status" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Enable</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                </group>
+                <group id="media" translate="label" type="text" sortOrder="2" showInDefault="1">
+                    <label>Icecat Media</label>
+                    <field id="import_images" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Import Images</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="import_videos" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Import Videos</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="import_pdf" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Import PDF</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                </group>
+                <group id="specification" translate="label" type="text" sortOrder="3" showInDefault="1">
+                    <label>Icecat Specifications</label>
+                    <field id="import_specification" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Import Specifications</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>icecat_specification</comment>
+                    </field>
+                    <field id="specification_header_color" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Specifications Heading Color</label>
+                        <comment><![CDATA[Background color]]></comment>
+                        <frontend_model>Icecat\DataFeed\Block\Adminhtml\Form\Field\Color</frontend_model>
+                        <validate>required-entry</validate>
+                        <depends>
+                            <field id="import_specification">1</field>
+                        </depends>
+                    </field>
+                </group>
+                <group id="other_fields" translate="label" type="text" sortOrder="4" showInDefault="1">
+                    <label>Icecat Other Enriched Fields</label>
+                    <field id="import_related_products" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Import Related Products</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="import_product_reviews" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Import Product Reviews</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="import_product_stories" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Import Product Stories</label>
+                        <comment>icecat_product_stories</comment>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="import_reasons_to_buy" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Import Reasons To Buy</label>
+                        <comment>icecat_reason_to_buy</comment>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="import_bullet_points" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Import Bullet Points</label>
+                        <comment>icecat_bullet_points</comment>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                </group>
+                <group id="basic_fields" translate="label" type="text" sortOrder="5" showInDefault="1">
+                    <label>Icecat Basic Fields</label>
+                    <field id="attributes" translate="label" sortOrder="12" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Attributes</label>
+                        <frontend_model>Icecat\DataFeed\Block\Adminhtml\Form\Field\ProductAttribute</frontend_model>
+                        <backend_model>Icecat\DataFeed\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                    </field>
+                </group>
+            </group>
+            <!-- End Product Attribute Configuration -->
+            <!-- Cron Configuration -->
+            <group id="cron" translate="label" sortOrder="70" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Manual and Automated Import Configuration</label>
+                <field id="cron_info" translate="label" type="text" sortOrder="5" showInDefault="1">
+                    <label>Prerequisite</label>
+                    <frontend_model>Icecat\DataFeed\Block\Adminhtml\System\Config\Form\CronInfo</frontend_model>
+                </field>
+                <field id="schedule_cron" type="text" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Cron Expression</label>
+                    <backend_model>Icecat\DataFeed\Model\Config\Backend\SaveAutomaticCron</backend_model>
+                    <comment>
+                        <![CDATA[
+                            <p>* * * * * Hint : <a href="https://crontab.guru/" target="_blank">Cron expression generator</a></p>
+                            <p>| | | | |</p>
+                            <p>| | | | +----- Day of week (0 - 7) (Sunday=0 or 7)</p>
+                            <p>| | | +------- Month (1 - 12)</p>
+                            <p>| | +--------- Day of month (1 - 31)</p>
+                            <p>| +----------- Hour (0 - 23)</p>
+                            <p>+------------- Minute (0 - 59)</p>
+                        ]]>
+                    </comment>
+                </field>
+                <field id="_new_data_import_only" translate="label" showInDefault="1" sortOrder="16">
+                    <label>Manual Imports</label>
+                    <frontend_model>Icecat\DataFeed\Block\Adminhtml\System\Config\Form\OnlyNewProduct</frontend_model>
+                </field>
+                <field id="import_data" translate="label" showInDefault="1" sortOrder="16">
+                    <frontend_model>Icecat\DataFeed\Block\Adminhtml\System\Config\Form\Button</frontend_model>
+                </field>
+                <field id="progress" translate="label" showInDefault="1" sortOrder="16">
+                    <frontend_model>Icecat\DataFeed\Block\Adminhtml\System\Config\Form\CheckImportStatus</frontend_model>
+                </field>
+            </group>
+            <!-- End Cron Configuration -->
+        </section>
+        <section id="icecat_stats" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+            <tab>icecat</tab>
+            <resource>Icecat_DataFeed::datafeed_configuration</resource>
+            <label>Import Statistics</label>
+            <group id="icecat_statistics" translate="label" type="text" sortOrder="11" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Import Statistics</label>
+                <field id="product_stats" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <frontend_model>Icecat\DataFeed\Block\Adminhtml\System\Config\Form\Statistics</frontend_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
+

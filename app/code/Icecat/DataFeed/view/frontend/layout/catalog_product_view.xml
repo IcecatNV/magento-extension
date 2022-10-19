@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="product.info.details">
+            <block class="Magento\Catalog\Block\Product\View" name="specification.tab" template="Icecat_DataFeed::product/specification.phtml" group="detailed_info" >
+                <arguments>
+                    <argument name="css_class" xsi:type="string">specification</argument>
+                    <argument translate="true" name="title" xsi:type="string">Specifications</argument>
+                    <argument name="sort_order" xsi:type="string">50</argument>
+                </arguments>
+            </block>
+            <block class="Icecat\DataFeed\Block\ProductAttachment" name="pdf-tab"
+                   template="Icecat_DataFeed::product/view/details/pdf_tab.phtml" group="detailed_info">
+                <arguments>
+                    <argument name="css_class" xsi:type="string">documents</argument>
+                    <argument translate="true" name="title" xsi:type="string">Documents</argument>
+                    <argument name="sort_order" xsi:type="string">60</argument>
+                </arguments>
+            </block>
+            <block class="Magento\Catalog\Block\Product\View" name="reasonToBuy.tab" template="Icecat_DataFeed::product/reasontobuy.phtml" group="detailed_info" >
+                <arguments>
+                    <argument translate="true" name="title" xsi:type="string">Reason To Buy</argument>
+                    <argument name="sort_order" xsi:type="string">70</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

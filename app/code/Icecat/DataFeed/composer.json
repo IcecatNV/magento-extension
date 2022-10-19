@@ -1,0 +1,23 @@
+{
+  "name": "github/github-repository-name",
+  "description": "Icecat Integration with magento 2",
+  "type": "magento2-module",
+  "license": ["MIT"],
+  "version": "1.0.0",
+  "require": {
+    "magento/framework": "~102.0|~103.0",
+    "dragonmantank/cron-expression": "^v3.3.2"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://repo.magento.com/"
+    }
+  ],
+  "autoload": {
+    "files": [ "registration.php" ],
+    "psr-4": {
+      "Icecat\\DataFeed\\": ""
+    }
+  }
+}
