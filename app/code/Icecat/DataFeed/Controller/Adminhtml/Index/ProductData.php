@@ -146,10 +146,13 @@ class ProductData extends Action
             }
             if (count($updatedStore) > 0) {
                 $this->messageManager->addSuccessMessage('Product updated successfully on ' . str_replace(", Admin", "", implode(' , ', $updatedStore)));
+                $result = ['success'=>1,'message'=>'Product updated successfully on ' . str_replace(", Admin", "", implode(' , ', $updatedStore))];
             } elseif (!empty($errorMessage)) {
                 $this->messageManager->addErrorMessage($errorMessage);
+                $result = ['success'=>0,'message'=>$errorMessage];
             }
-            return $this->_redirect('catalog/product/edit', ['id' => $productId, '_current' => true]);
+            $this->getResponse()->setBody(json_encode($result));
+            //return $this->_redirect('catalog/product/edit', ['id' => $productId, '_current' => true]);
         } catch (NoSuchEntityException $noSuchEntityException) {
         }
     }
