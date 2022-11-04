@@ -15,6 +15,7 @@ use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Store\Api\StoreRepositoryInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 class ProductData extends Action
 {
@@ -23,6 +24,7 @@ class ProductData extends Action
     private ProductRepository $productRepository;
     private IceCatUpdateProduct $iceCatUpdateProduct;
     private StoreRepositoryInterface $storeRepository;
+    private StoreManagerInterface $storeManager;
     private Processor $processor;
 
     /**
@@ -49,6 +51,7 @@ class ProductData extends Action
      * @param ProductRepository $productRepository
      * @param IceCatUpdateProduct $iceCatUpdateProduct
      * @param StoreRepositoryInterface $storeRepository
+     * @param StoreManagerInterface $storeManager
      * @param Processor $processor
      * @param ResourceConnection $resourceConnection
      * @param ObjectManagerInterface $objectManager
@@ -60,6 +63,7 @@ class ProductData extends Action
         ProductRepository        $productRepository,
         IceCatUpdateProduct      $iceCatUpdateProduct,
         StoreRepositoryInterface $storeRepository,
+        StoreManagerInterface    $storeManager,
         Processor $processor,
         ResourceConnection $resourceConnection,
         ObjectManagerInterface $objectManager
@@ -70,6 +74,7 @@ class ProductData extends Action
         $this->productRepository = $productRepository;
         $this->iceCatUpdateProduct = $iceCatUpdateProduct;
         $this->storeRepository = $storeRepository;
+        $this->storeManager = $storeManager;
         $this->processor = $processor;
         $this->galleryEntitytable = $resourceConnection->getTableName('catalog_product_entity_media_gallery_value');
         $this->galleryTable = $resourceConnection->getTableName('catalog_product_entity_media_gallery');
@@ -115,12 +120,44 @@ class ProductData extends Action
                     if (!empty($response) && !empty($response['Code'])) {
                         $errorMessage = $response['Message'];
                     } else {
+                        if ($this->data->isCategoryImportEnabled()) {
+                            $rootCatId = $this->storeManager->getStore($store)->getRootCategoryId();
+                            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                            $storeRootCat = $objectManager->get('Magento\Catalog\Model\Category');
+                            $storeRootCatData = $storeRootCat->load($rootCatId);
+                            $storeRootCatName = $storeRootCatData->getName();
+                            $myRoot='Icecat Categories';
+                            if(($rootCatId != 2) && ($storeRootCatName != $myRoot))
+                            {
+                                // Need to write logic to create root cat for store
+                                $rootNodeId = 1;
+                                // Get Root Category
+                                $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
+                                $cat_info = $rootCat->load($rootNodeId);
+                                $name = ucfirst($myRoot);
+                                $url = strtolower($myRoot);
+                                $cleanurl = trim(preg_replace('/ +/', '', preg_replace('/[^A-Za-z0-9 ]/', '', urldecode(html_entity_decode(strip_tags($url))))));
+                                $categoryFactory = $objectManager->get('\Magento\Catalog\Model\CategoryFactory');
+                                /// Add a new root category under root category
+                                $categoryTmp = $categoryFactory->create();
+                                $categoryTmp->setName($name);
+                                $categoryTmp->setIsActive(false);
+                                $categoryTmp->setUrlKey($cleanurl);
+                                $categoryTmp->setData('description', 'description');
+                                $categoryTmp->setParentId($rootCat->getId());
+                                $categoryTmp->setStoreId($store);
+                                $categoryTmp->setPath($rootCat->getPath());
+                                $savedCategory = $categoryTmp->save();
+                                $newlycreatedId = $savedCategory->getId();
+                            }
+                        }
                         $globalImageArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalImageArray);
                         $storeData = $this->storeRepository->getById($store);
                         $updatedStore[] = $storeData->getName();
                     }
                 } else {
                     $this->messageManager->addErrorMessage('There is no matching criteria - GTIN or Brand Name & Product Code values are empty.');
+                    $result = ['success'=>0,'message'=>'There is no matching criteria - GTIN or Brand Name & Product Code values are empty.'];
                     break;
                 }
             }

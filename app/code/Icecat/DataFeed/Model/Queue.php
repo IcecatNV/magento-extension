@@ -11,6 +11,7 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Zend_Db_Expr;
 use Zend_Db_Statement_Exception;
@@ -65,6 +66,9 @@ class Queue
     /** @var int */
     private $noOfFailedJobs = 0;
 
+    /** @var StoreManager */
+    private StoreManagerInterface $storeManager;
+
 
     /**
      * @param CollectionFactory $collectionFactory
@@ -75,6 +79,7 @@ class Queue
      * @param ProductRepository $productRepository
      * @param IcecatApiService $icecatApiService
      * @param IceCatUpdateProduct $iceCatUpdateProduct
+     * @param StoreManagerInterface $storeManager
      * @param Processor $processor
      */
     public function __construct(
@@ -86,6 +91,7 @@ class Queue
         ProductRepository $productRepository,
         IcecatApiService $icecatApiService,
         IceCatUpdateProduct $iceCatUpdateProduct,
+        StoreManagerInterface    $storeManager,
         Processor $processor
     ) {
         $this->collectionFactory = $collectionFactory;
@@ -99,6 +105,7 @@ class Queue
         $this->productRepository = $productRepository;
         $this->icecatApiService = $icecatApiService;
         $this->iceCatUpdateProduct = $iceCatUpdateProduct;
+        $this->storeManager = $storeManager;
         $this->processor = $processor;
     }
 
@@ -270,6 +277,37 @@ class Queue
                                 $errorProductIds[]  = $productId;
                                 $errorLog['Product ID-'.$productId] = $errorMessage;
                             } else {
+                                if ($this->data->isCategoryImportEnabled()) {
+                                    $rootCatId = $this->storeManager->getStore($store)->getRootCategoryId();
+                                    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                                    $storeRootCat = $objectManager->get('Magento\Catalog\Model\Category');
+                                    $storeRootCatData = $storeRootCat->load($rootCatId);
+                                    $storeRootCatName = $storeRootCatData->getName();
+                                    $myRoot='Icecat Categories';
+                                    if(($rootCatId != 2) && ($storeRootCatName != $myRoot))
+                                    {
+                                        // Need to write logic to create root cat for store
+                                        $rootNodeId = 1;
+                                        // Get Root Category
+                                        $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
+                                        $cat_info = $rootCat->load($rootNodeId);
+                                        $name = ucfirst($myRoot);
+                                        $url = strtolower($myRoot);
+                                        $cleanurl = trim(preg_replace('/ +/', '', preg_replace('/[^A-Za-z0-9 ]/', '', urldecode(html_entity_decode(strip_tags($url))))));
+                                        $categoryFactory = $objectManager->get('\Magento\Catalog\Model\CategoryFactory');
+                                        /// Add a new root category under root category
+                                        $categoryTmp = $categoryFactory->create();
+                                        $categoryTmp->setName($name);
+                                        $categoryTmp->setIsActive(false);
+                                        $categoryTmp->setUrlKey($cleanurl);
+                                        $categoryTmp->setData('description', 'description');
+                                        $categoryTmp->setParentId($rootCat->getId());
+                                        $categoryTmp->setStoreId($store);
+                                        $categoryTmp->setPath($rootCat->getPath());
+                                        $savedCategory = $categoryTmp->save();
+                                        $newlycreatedId = $savedCategory->getId();
+                                    }
+                                }
                                 $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store);
                                 $successProducts[] = $productId;
                             }
