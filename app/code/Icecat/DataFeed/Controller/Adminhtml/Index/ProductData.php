@@ -16,6 +16,8 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Store\Api\StoreRepositoryInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Eav\Model\Config;
+use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 
 class ProductData extends Action
 {
@@ -45,6 +47,11 @@ class ProductData extends Action
     private $columnExists;
 
     /**
+     * @var Config|ConfigInterface
+     */
+    private $config;
+
+    /**
      * @param Context $context
      * @param Data $data
      * @param IcecatApiService $icecatApiService
@@ -55,6 +62,7 @@ class ProductData extends Action
      * @param Processor $processor
      * @param ResourceConnection $resourceConnection
      * @param ObjectManagerInterface $objectManager
+     * @param ConfigInterface $config
      */
     public function __construct(
         Context                  $context,
@@ -64,6 +72,7 @@ class ProductData extends Action
         IceCatUpdateProduct      $iceCatUpdateProduct,
         StoreRepositoryInterface $storeRepository,
         StoreManagerInterface    $storeManager,
+        ConfigInterface $config,
         Processor $processor,
         ResourceConnection $resourceConnection,
         ObjectManagerInterface $objectManager
@@ -75,6 +84,7 @@ class ProductData extends Action
         $this->iceCatUpdateProduct = $iceCatUpdateProduct;
         $this->storeRepository = $storeRepository;
         $this->storeManager = $storeManager;
+        $this->config = $config;
         $this->processor = $processor;
         $this->galleryEntitytable = $resourceConnection->getTableName('catalog_product_entity_media_gallery_value');
         $this->galleryTable = $resourceConnection->getTableName('catalog_product_entity_media_gallery');
@@ -111,6 +121,44 @@ class ProductData extends Action
                     $this->productRepository->save($product);
                 }
             }
+            // Check for icecat root category from all root categories, create it if not there
+            $rootCats = array();
+            if ($this->data->isCategoryImportEnabled()) {
+                $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                $collection = $objectManager->get('\Magento\Catalog\Model\ResourceModel\Category\CollectionFactory')->create();
+                $collection->addAttributeToFilter('level', array('eq' => 1));
+                foreach ($collection as $coll) {
+                    $rootCatId = $coll->getId();                    
+                    $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
+                    $rootCatData = $rootCat->load($rootCatId);
+                    $rootCats[] = strtolower($rootCatData->getName());
+                }
+                $myRoot=strtolower('Icecat Categories');
+                if(!in_array($myRoot,$rootCats))
+                {
+                    $store = $this->storeManager->getStore();
+                    $storeId = $store->getStoreId();
+                    $rootNodeId = 1;
+                    $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
+                    $cat_info = $rootCat->load($rootNodeId);
+                    $myRoot='Icecat Categories';
+                    $name=ucfirst($myRoot);
+                    $url=strtolower($myRoot);
+                    $cleanurl = trim(preg_replace('/ +/', '', preg_replace('/[^A-Za-z0-9 ]/', '', urldecode(html_entity_decode(strip_tags($url))))));
+                    $categoryFactory=$objectManager->get('\Magento\Catalog\Model\CategoryFactory');
+                    $categoryTmp = $categoryFactory->create();
+                    $categoryTmp->setName($name);
+                    $categoryTmp->setIsActive(false);
+                    $categoryTmp->setUrlKey($cleanurl);
+                    $categoryTmp->setData('description', 'description');
+                    $categoryTmp->setParentId($rootCat->getId());
+                    $categoryTmp->setStoreId($storeId);
+                    $categoryTmp->setPath($rootCat->getPath());
+                    $savedCategory = $categoryTmp->save();
+                    $newlycreatedId = $savedCategory->getId();
+                    $this->config->saveConfig('datafeed/icecat/root_category_id', $newlycreatedId, 'default', 0);
+                }
+            }
             foreach ($storeArray as $store) {
                 $product = $this->productRepository->getById($productId, false, $store);
                 $language = $this->data->getStoreLanguage($store);
@@ -120,37 +168,6 @@ class ProductData extends Action
                     if (!empty($response) && !empty($response['Code'])) {
                         $errorMessage = $response['Message'];
                     } else {
-                        if ($this->data->isCategoryImportEnabled()) {
-                            $rootCatId = $this->storeManager->getStore($store)->getRootCategoryId();
-                            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-                            $storeRootCat = $objectManager->get('Magento\Catalog\Model\Category');
-                            $storeRootCatData = $storeRootCat->load($rootCatId);
-                            $storeRootCatName = $storeRootCatData->getName();
-                            $myRoot='Icecat Categories';
-                            if(($rootCatId != 2) && ($storeRootCatName != $myRoot))
-                            {
-                                // Need to write logic to create root cat for store
-                                $rootNodeId = 1;
-                                // Get Root Category
-                                $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
-                                $cat_info = $rootCat->load($rootNodeId);
-                                $name = ucfirst($myRoot);
-                                $url = strtolower($myRoot);
-                                $cleanurl = trim(preg_replace('/ +/', '', preg_replace('/[^A-Za-z0-9 ]/', '', urldecode(html_entity_decode(strip_tags($url))))));
-                                $categoryFactory = $objectManager->get('\Magento\Catalog\Model\CategoryFactory');
-                                /// Add a new root category under root category
-                                $categoryTmp = $categoryFactory->create();
-                                $categoryTmp->setName($name);
-                                $categoryTmp->setIsActive(false);
-                                $categoryTmp->setUrlKey($cleanurl);
-                                $categoryTmp->setData('description', 'description');
-                                $categoryTmp->setParentId($rootCat->getId());
-                                $categoryTmp->setStoreId($store);
-                                $categoryTmp->setPath($rootCat->getPath());
-                                $savedCategory = $categoryTmp->save();
-                                $newlycreatedId = $savedCategory->getId();
-                            }
-                        }
                         $globalImageArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalImageArray);
                         $storeData = $this->storeRepository->getById($store);
                         $updatedStore[] = $storeData->getName();
