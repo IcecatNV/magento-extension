@@ -211,36 +211,6 @@ class CreateProductAttribute implements DataPatchInterface, PatchRevertableInter
                 'apply_to' => ''
             ]
         );
-
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
-        $store = $storeManager->getStore();
-        $storeId = $store->getStoreId();
-        /// Get Root Category ID
-        $rootNodeId = 1; //set it as 1.
-        /// Get Root Category
-        $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
-        $cat_info = $rootCat->load($rootNodeId);
-
-        $myRoot='Icecat Categories'; // Category Names
-
-        $name=ucfirst($myRoot);
-        $url=strtolower($myRoot);
-        $cleanurl = trim(preg_replace('/ +/', '', preg_replace('/[^A-Za-z0-9 ]/', '', urldecode(html_entity_decode(strip_tags($url))))));
-        $categoryFactory=$objectManager->get('\Magento\Catalog\Model\CategoryFactory');
-        /// Add a new root category under root category
-        $categoryTmp = $categoryFactory->create();
-        $categoryTmp->setName($name);
-        $categoryTmp->setIsActive(false);
-        $categoryTmp->setUrlKey($cleanurl);
-        $categoryTmp->setData('description', 'description');
-        $categoryTmp->setParentId($rootCat->getId());
-        $categoryTmp->setStoreId($storeId);
-        $categoryTmp->setPath($rootCat->getPath());
-        $savedCategory = $categoryTmp->save();
-        $newlycreatedId = $savedCategory->getId();
-        $this->moduleDataSetup->getConnection()->startSetup();
-        $this->config->saveConfig('datafeed/icecat/root_category_id', $newlycreatedId, 'default', 0);
     }
 
     public function revert()
