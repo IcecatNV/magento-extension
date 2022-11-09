@@ -159,6 +159,7 @@ class ProductData extends Action
                     $this->config->saveConfig('datafeed/icecat/root_category_id', $newlycreatedId, 'default', 0);
                 }
             }
+            
             foreach ($storeArray as $store) {
                 $product = $this->productRepository->getById($productId, false, $store);
                 $language = $this->data->getStoreLanguage($store);
@@ -199,10 +200,10 @@ class ProductData extends Action
                 }
             }
             if (count($updatedStore) > 0) {
-                $this->messageManager->addSuccessMessage('Product updated successfully on ' . str_replace(", Admin", "", implode(' , ', $updatedStore)));
+                //$this->messageManager->addSuccessMessage('Product updated successfully on ' . str_replace(", Admin", "", implode(' , ', $updatedStore)));
                 $result = ['success'=>1,'message'=>'Product updated successfully on ' . str_replace(", Admin", "", implode(' , ', $updatedStore))];
             } elseif (!empty($errorMessage)) {
-                $this->messageManager->addErrorMessage($errorMessage);
+                //$this->messageManager->addErrorMessage($errorMessage);
                 $result = ['success'=>0,'message'=>$errorMessage];
             }
             $this->getResponse()->setBody(json_encode($result));
