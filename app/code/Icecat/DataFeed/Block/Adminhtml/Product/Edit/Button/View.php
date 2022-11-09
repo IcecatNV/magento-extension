@@ -53,7 +53,7 @@ class View extends Generic
             $deleteConfirmMsg = __("You are about to update this single product from Icecat. Do you wish to continue?");
             return [
                 'label' => __('Import Data From Icecat'),
-                'on_click' => 'deleteConfirm("' . $deleteConfirmMsg . '", "' . $this->getButtonUrl() . '")',
+                'on_click' => 'import_single_prod_info("'.$this->getButtonUrl().'")',
                 'class' => 'view action-secondary',
                 'sort_order' => 10
             ];
