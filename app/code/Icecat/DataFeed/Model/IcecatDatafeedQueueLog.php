@@ -9,7 +9,7 @@ use Magento\Framework\Model\AbstractModel;
 class IcecatDatafeedQueueLog extends AbstractModel implements IdentityInterface
 {
 
-    const CACHE_TAG = 'icecat_datafeed_queue_log';
+    protected const CACHE_TAG = 'icecat_datafeed_queue_log';
 
     protected $_cacheTag = 'icecat_datafeed_queue_log';
 

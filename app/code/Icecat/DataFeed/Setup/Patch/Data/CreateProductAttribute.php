@@ -36,7 +36,7 @@ class CreateProductAttribute implements DataPatchInterface, PatchRevertableInter
     private $eavSetupFactory;
     private $schemaSetup;
 
-    const ICECAT_TABLES = [
+    protected const ICECAT_TABLES = [
         'icecat_product_attachment',
         'icecat_product_review',
         'icecat_datafeed_queue',
@@ -49,6 +49,7 @@ class CreateProductAttribute implements DataPatchInterface, PatchRevertableInter
      */
     private $config;
     private CategoryRepository $categoryRepository;
+    protected $scopeConfig;
 
     /**
      * @param ModuleDataSetupInterface $moduleDataSetup
@@ -56,6 +57,7 @@ class CreateProductAttribute implements DataPatchInterface, PatchRevertableInter
      * @param SchemaSetupInterface $schemaSetup
      * @param ConfigInterface $config
      * @param CategoryRepository $categoryRepository
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      */
     public function __construct(
         ModuleDataSetupInterface $moduleDataSetup,
@@ -63,7 +65,8 @@ class CreateProductAttribute implements DataPatchInterface, PatchRevertableInter
         SchemaSetupInterface $schemaSetup,
         ConfigInterface $config,
         CategoryRepository $categoryRepository,
-        Registry $registry
+        Registry $registry,
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
     ) {
         $this->moduleDataSetup = $moduleDataSetup;
         $this->eavSetupFactory = $eavSetupFactory;
@@ -71,6 +74,7 @@ class CreateProductAttribute implements DataPatchInterface, PatchRevertableInter
         $this->config = $config;
         $this->categoryRepository = $categoryRepository;
         $registry->register('isSecureArea', true);
+        $this->_scopeConfig = $scopeConfig;
     }
 
     public static function getDependencies()
@@ -206,7 +210,37 @@ class CreateProductAttribute implements DataPatchInterface, PatchRevertableInter
                 'unique' => false,
                 'apply_to' => ''
             ]
-        );        
+        );
+
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+        $store = $storeManager->getStore();
+        $storeId = $store->getStoreId();
+        /// Get Root Category ID
+        $rootNodeId = 1; //set it as 1.
+        /// Get Root Category
+        $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
+        $cat_info = $rootCat->load($rootNodeId);
+
+        $myRoot='Icecat Categories'; // Category Names
+
+        $name=ucfirst($myRoot);
+        $url=strtolower($myRoot);
+        $cleanurl = trim(preg_replace('/ +/', '', preg_replace('/[^A-Za-z0-9 ]/', '', urldecode(html_entity_decode(strip_tags($url))))));
+        $categoryFactory=$objectManager->get('\Magento\Catalog\Model\CategoryFactory');
+        /// Add a new root category under root category
+        $categoryTmp = $categoryFactory->create();
+        $categoryTmp->setName($name);
+        $categoryTmp->setIsActive(false);
+        $categoryTmp->setUrlKey($cleanurl);
+        $categoryTmp->setData('description', 'description');
+        $categoryTmp->setParentId($rootCat->getId());
+        $categoryTmp->setStoreId($storeId);
+        $categoryTmp->setPath($rootCat->getPath());
+        $savedCategory = $categoryTmp->save();
+        $newlycreatedId = $savedCategory->getId();
+        $this->moduleDataSetup->getConnection()->startSetup();
+        $this->config->saveConfig('datafeed/icecat/root_category_id', $newlycreatedId, 'default', 0);
     }
 
     public function revert()
@@ -214,14 +248,14 @@ class CreateProductAttribute implements DataPatchInterface, PatchRevertableInter
         $this->moduleDataSetup->getConnection()->startSetup();
 
         // Deleting category
-        $connection = $this->moduleDataSetup->getConnection();
+        /* $connection = $this->moduleDataSetup->getConnection();
         $table = $connection->getTableName('core_config_data');
         $category = $connection->getConnection()
             ->query('SELECT value FROM ' . $table . ' WHERE path = "datafeed/icecat/root_category_id"')
-            ->fetch();
-
-        if (!empty($category)) {
-            $categoryId = $category['value'];
+            ->fetch(); */
+        $categoryId = $this->_scopeConfig->getValue('datafeed/icecat/root_category_id',\Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        if (!empty($categoryId)) {
+            //$categoryId = $category['value'];
             $category = $this->categoryRepository->get($categoryId);
             $subCategories = $category->getChildrenCategories();
             if ($subCategories->getData() > 0) {

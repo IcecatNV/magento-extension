@@ -16,7 +16,7 @@ class IcecatApiService
     /**
      * API request URL
      */
-    const API_REQUEST_URI = 'https://live.icecat.biz/api/';
+    protected const API_REQUEST_URI = 'https://live.icecat.biz/api/';
 
     private ClientFactory $clientFactory;
     private ResponseFactory $responseFactory;

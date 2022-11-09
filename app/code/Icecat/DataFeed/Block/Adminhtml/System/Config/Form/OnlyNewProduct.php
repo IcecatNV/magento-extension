@@ -36,11 +36,11 @@ class OnlyNewProduct extends Field
     public function getButtonHtml()
     {
         $prod_button = $this->getLayout()->createBlock('Magento\Backend\Block\Widget\Button')
-            ->setData(array(
+            ->setData([
                 'id' => 'icecat_button',
                 'label' => 'Delta Import',
                 'onclick' => 'javascript:import_new_prod_info(); return false;'
-            ));
+            ]);
         $buttons = $prod_button->toHtml();
         return $buttons;
     }

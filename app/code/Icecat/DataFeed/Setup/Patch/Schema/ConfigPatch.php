@@ -20,7 +20,7 @@ class ConfigPatch implements SchemaPatchInterface
      * @var ModuleDataSetupInterface
      */
     private $moduleDataSetup;
-
+    protected $scopeConfig;
     private $defaultConfigData = [
         'datafeed/general/enable' => 0,
         'datafeed/product_attributes/icecat_categorization/status' => '0',
@@ -80,12 +80,14 @@ class ConfigPatch implements SchemaPatchInterface
 
     public function __construct(
         ModuleDataSetupInterface $moduleDataSetup,
-        ConfigInterface $config
+        ConfigInterface $config,
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
     ) {
         $this->config = $config;
         $this->moduleDataSetup = $moduleDataSetup;
         $this->serializeDefaultArrayConfigData();
         $this->mergeDefaultDataWithArrayData();
+        $this->_scopeConfig = $scopeConfig;
     }
 
     public static function getDependencies()
@@ -101,14 +103,19 @@ class ConfigPatch implements SchemaPatchInterface
     public function apply()
     {
         $this->moduleDataSetup->getConnection()->startSetup();
-        $connection = $this->moduleDataSetup->getConnection();
-        $table = $connection->getTableName('core_config_data');
+        //$connection = $this->moduleDataSetup->getConnection();
+        //$table = $connection->getTableName('core_config_data');
 
         /* SET DEFAULT CONFIG DATA */
 
-        $alreadyInserted = $connection->getConnection()
+        /* $alreadyInserted = $connection->getConnection()
             ->query('SELECT path, value FROM ' . $table . ' WHERE path LIKE "datafeed_%"')
             ->fetchAll(\PDO::FETCH_KEY_PAIR);
+         */
+        $alreadyInserted = $this->_scopeConfig->getValue('datafeed_%',\Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        //$this->scopeConfig->getValue('path/of/config', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+
+            
 
         foreach ($this->defaultConfigData as $path => $value) {
             if (isset($alreadyInserted[$path])) {

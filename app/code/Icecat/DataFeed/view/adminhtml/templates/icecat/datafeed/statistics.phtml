@@ -1,6 +1,6 @@
 <?php
-$import_info    = $this->collectData();
-$timezone       = $this->getTimezone();
+$import_info    = $block->collectData();
+$timezone       = $block->getTimezone();
 $configTimezone = new DateTimeZone($timezone);
 ?>
 
@@ -80,7 +80,7 @@ $configTimezone = new DateTimeZone($timezone);
                 <td>
                     <?php
                     if (!empty($import_info['missing_gtin'])) {
-                        $productCount = count(explode(',', rtrim($import_info['missing_gtin'],",")));
+                        $productCount = count(explode(',', rtrim($import_info['missing_gtin'], ",")));
                         echo $productCount;
                     } else {
                         echo '0';
@@ -105,9 +105,9 @@ $configTimezone = new DateTimeZone($timezone);
                 <td>
                     <?php
                     if (!empty($import_info['log_url'])) {
-                    ?>
+                        ?>
                         <a href="<?= $import_info['log_url'] ?>" download>Download</a>
-                    <?php
+                        <?php
                     } else {
                         echo '&nbsp';
                     }

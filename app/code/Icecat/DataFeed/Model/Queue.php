@@ -11,7 +11,6 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\ObjectManagerInterface;
-use Magento\Store\Model\StoreManagerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Zend_Db_Expr;
 use Zend_Db_Statement_Exception;
@@ -66,9 +65,6 @@ class Queue
     /** @var int */
     private $noOfFailedJobs = 0;
 
-    /** @var StoreManager */
-    private StoreManagerInterface $storeManager;
-
 
     /**
      * @param CollectionFactory $collectionFactory
@@ -79,7 +75,6 @@ class Queue
      * @param ProductRepository $productRepository
      * @param IcecatApiService $icecatApiService
      * @param IceCatUpdateProduct $iceCatUpdateProduct
-     * @param StoreManagerInterface $storeManager
      * @param Processor $processor
      */
     public function __construct(
@@ -91,7 +86,6 @@ class Queue
         ProductRepository $productRepository,
         IcecatApiService $icecatApiService,
         IceCatUpdateProduct $iceCatUpdateProduct,
-        StoreManagerInterface    $storeManager,
         Processor $processor
     ) {
         $this->collectionFactory = $collectionFactory;
@@ -105,14 +99,14 @@ class Queue
         $this->productRepository = $productRepository;
         $this->icecatApiService = $icecatApiService;
         $this->iceCatUpdateProduct = $iceCatUpdateProduct;
-        $this->storeManager = $storeManager;
         $this->processor = $processor;
     }
 
     public function addJobToQueue()
     {
         $productCollection = $this->getProductCollections();
-        $productCollection->getSelect()->reset(\Zend_Db_Select::COLUMNS);
+        //$productCollection->getSelect()->reset(\Zend_Db_Select::COLUMNS);
+        $productCollection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS);
         $productCollection->getSelect()->columns('entity_id');
         $collection1Ids = $productCollection->getAllIds();
         sort($collection1Ids);
@@ -137,7 +131,7 @@ class Queue
         } else {
             $productCollection  = $this->getNewProductsCollections($schedulerDetails['ended']);
         }
-        $productCollection->getSelect()->reset(\Zend_Db_Select::COLUMNS);
+        $productCollection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS);
         $productCollection->getSelect()->columns('entity_id');
         $collection1Ids = $productCollection->getAllIds();
         sort($collection1Ids);
@@ -206,7 +200,7 @@ class Queue
     {
         $collection = $this->collectionFactory
             ->create();
-        $collection->addAttributeToFilter('updated_at', array('gteq' => $cronLastUpdated));
+        $collection->addAttributeToFilter('updated_at', ['gteq' => $cronLastUpdated]);
         return $collection;
     }
 
@@ -214,7 +208,7 @@ class Queue
     {
         $collection = $this->collectionFactory
             ->create();
-        $collection->addAttributeToFilter('icecat_updated_time', array('null' => true));
+        $collection->addAttributeToFilter('icecat_updated_time', ['null' => true]);
         return $collection;
     }
 
@@ -246,14 +240,14 @@ class Queue
                     $storeArrayForImage = explode(',', $icecatStores);
                     //$storeArray[] = 0; // Admin store
                     $storeArrayForImage[] = 0; // Admin store
-                    $updatedStore = array();
+                    $updatedStore = [];
                     $errorMessage = null;
                     $globalImageArray = [];
                     foreach ($storeArrayForImage as $store) {
                         if ($this->data->isImportImagesEnabled()) {
                             $product = $this->productRepository->getById($productId, false, $store);
                             $images = $product->getMediaGalleryImages();
-                            $mediaTypeArray = array('image', 'small_image', 'thumbnail');
+                            $mediaTypeArray = ['image', 'small_image', 'thumbnail'];
                             $this->processor->clearMediaAttribute($product, $mediaTypeArray);
                             $existingMediaGalleryEntries = $product->getMediaGalleryEntries();
                             foreach ($existingMediaGalleryEntries as $key => $entry) {
@@ -264,44 +258,6 @@ class Queue
                                 $this->processor->removeImage($product, $child->getFile());
                             }
                             $this->productRepository->save($product);
-                        }
-                    }
-                    // Check for icecat root category from all root categories, create it if not there
-                    $rootCats = array();
-                    if ($this->data->isCategoryImportEnabled()) {
-                        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-                        $collection = $objectManager->get('\Magento\Catalog\Model\ResourceModel\Category\CollectionFactory')->create();
-                        $collection->addAttributeToFilter('level', array('eq' => 1));
-                        foreach ($collection as $coll) {
-                            $rootCatId = $coll->getId();                    
-                            $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
-                            $rootCatData = $rootCat->load($rootCatId);
-                            $rootCats[] = strtolower($rootCatData->getName());
-                        }
-                        $myRoot=strtolower('Icecat Categories');
-                        if(!in_array($myRoot,$rootCats))
-                        {
-                            $store = $this->storeManager->getStore();
-                            $storeId = $store->getStoreId();
-                            $rootNodeId = 1;
-                            $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
-                            $cat_info = $rootCat->load($rootNodeId);
-                            $myRoot='Icecat Categories';
-                            $name=ucfirst($myRoot);
-                            $url=strtolower($myRoot);
-                            $cleanurl = trim(preg_replace('/ +/', '', preg_replace('/[^A-Za-z0-9 ]/', '', urldecode(html_entity_decode(strip_tags($url))))));
-                            $categoryFactory=$objectManager->get('\Magento\Catalog\Model\CategoryFactory');
-                            $categoryTmp = $categoryFactory->create();
-                            $categoryTmp->setName($name);
-                            $categoryTmp->setIsActive(false);
-                            $categoryTmp->setUrlKey($cleanurl);
-                            $categoryTmp->setData('description', 'description');
-                            $categoryTmp->setParentId($rootCat->getId());
-                            $categoryTmp->setStoreId($storeId);
-                            $categoryTmp->setPath($rootCat->getPath());
-                            $savedCategory = $categoryTmp->save();
-                            $newlycreatedId = $savedCategory->getId();
-                            $this->config->saveConfig('datafeed/icecat/root_category_id', $newlycreatedId, 'default', 0);
                         }
                     }
                     foreach ($storeArray as $store) {

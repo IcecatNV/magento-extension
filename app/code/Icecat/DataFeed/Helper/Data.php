@@ -22,41 +22,40 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $serialize;
     protected $_icecatQueueLog;
 
-    const XML_PATH_ICECAT_DATAFEED_ENABLED = 'datafeed/general/enable';
+    protected const XML_PATH_ICECAT_DATAFEED_ENABLED = 'datafeed/general/enable';
 
-    const XML_PATH_ICECAT_DATAFEED_AUTH_USERNAME = 'datafeed/authentication/username';
-    const XML_PATH_ICECAT_DATAFEED_AUTH_PASSWORD = 'datafeed/authentication/password';
-    const XML_PATH_ICECAT_DATAFEED_API_ACCESS_TOKEN = 'datafeed/authentication/access_token';
+    protected const XML_PATH_ICECAT_DATAFEED_AUTH_USERNAME = 'datafeed/authentication/username';
+    protected const XML_PATH_ICECAT_DATAFEED_AUTH_PASSWORD = 'datafeed/authentication/password';
+    protected const XML_PATH_ICECAT_DATAFEED_API_ACCESS_TOKEN = 'datafeed/authentication/access_token';
 
-    const XML_PATH_ICECAT_STORE_CONFIGURATION = 'datafeed/icecat_store_config/stores';
+    protected const XML_PATH_ICECAT_STORE_CONFIGURATION = 'datafeed/icecat_store_config/stores';
 
-    const XML_PATH_ICECAT_GTIN_MAPPING = 'datafeed/gtin_fetch_type/gtin';
-    const XML_PATH_ICECAT_PRODUCT_CODE_MAPPING = 'datafeed/product_brand_fetch_type/product_code';
-    const XML_PATH_ICECAT_BRAND_MAPPING = 'datafeed/product_brand_fetch_type/brand';
+    protected const XML_PATH_ICECAT_GTIN_MAPPING = 'datafeed/gtin_fetch_type/gtin';
+    protected const XML_PATH_ICECAT_PRODUCT_CODE_MAPPING = 'datafeed/product_brand_fetch_type/product_code';
+    protected const XML_PATH_ICECAT_BRAND_MAPPING = 'datafeed/product_brand_fetch_type/brand';
+    protected const XML_PATH_ICECAT_IMPORT_ICECAT_CATEGORISATION_STATUS = 'datafeed/product_attributes/icecat_categorization/status';
+    protected const XML_PATH_ICECAT_IMPORT_ICECAT_CATEGORISATION_INCLUDE_IN_MENU = 'datafeed/product_attributes/icecat_categorization/include_in_menu';
 
-    const XML_PATH_ICECAT_IMPORT_ICECAT_CATEGORISATION_STATUS = 'datafeed/product_attributes/icecat_categorization/status';
-    const XML_PATH_ICECAT_IMPORT_ICECAT_CATEGORISATION_INCLUDE_IN_MENU = 'datafeed/product_attributes/icecat_categorization/include_in_menu';
+    protected const XML_PATH_ICECAT_IMPORT_IMAGES = 'datafeed/product_attributes/media/import_images';
+    protected const XML_PATH_ICECAT_IMPORT_VIDEOS = 'datafeed/product_attributes/media/import_videos';
+    protected const XML_PATH_ICECAT_IMPORT_PDF = 'datafeed/product_attributes/media/import_pdf';
+    protected const XML_PATH_ICECAT_PDF_ATTRIBUTE = 'datafeed/product_attributes/media/pdf_attribute';
 
-    const XML_PATH_ICECAT_IMPORT_IMAGES = 'datafeed/product_attributes/media/import_images';
-    const XML_PATH_ICECAT_IMPORT_VIDEOS = 'datafeed/product_attributes/media/import_videos';
-    const XML_PATH_ICECAT_IMPORT_PDF = 'datafeed/product_attributes/media/import_pdf';
-    const XML_PATH_ICECAT_PDF_ATTRIBUTE = 'datafeed/product_attributes/media/pdf_attribute';
+    protected const XML_PATH_ICECAT_IMPORT_SPECIFICATION = 'datafeed/product_attributes/specification/import_specification';
+    protected const XML_PATH_ICECAT_IMPORT_SPECIFICATION_ATTRIBUTE = 'datafeed/product_attributes/specification/specification_attribute';
+    protected const XML_PATH_ICECAT_IMPORT_SPECIFICATION_HEADER_COLOR = 'datafeed/product_attributes/specification/specification_header_color';
 
-    const XML_PATH_ICECAT_IMPORT_SPECIFICATION = 'datafeed/product_attributes/specification/import_specification';
-    const XML_PATH_ICECAT_IMPORT_SPECIFICATION_ATTRIBUTE = 'datafeed/product_attributes/specification/specification_attribute';
-    const XML_PATH_ICECAT_IMPORT_SPECIFICATION_HEADER_COLOR = 'datafeed/product_attributes/specification/specification_header_color';
+    protected const XML_PATH_ICECAT_IMPORT_RELATED_PRODUCT = 'datafeed/product_attributes/other_fields/import_related_products';
+    protected const XML_PATH_ICECAT_IMPORT_PRODUCT_STORIES = 'datafeed/product_attributes/other_fields/import_product_stories';
+    protected const XML_PATH_ICECAT_IMPORT_PRODUCT_REVIEWS = 'datafeed/product_attributes/other_fields/import_product_reviews';
+    protected const XML_PATH_ICECAT_IMPORT_REASON_TO_BUY = 'datafeed/product_attributes/other_fields/import_reasons_to_buy';
+    protected const XML_PATH_ICECAT_IMPORT_BULLET_POINTS = 'datafeed/product_attributes/other_fields/import_bullet_points';
 
-    const XML_PATH_ICECAT_IMPORT_RELATED_PRODUCT = 'datafeed/product_attributes/other_fields/import_related_products';
-    const XML_PATH_ICECAT_IMPORT_PRODUCT_STORIES = 'datafeed/product_attributes/other_fields/import_product_stories';
-    const XML_PATH_ICECAT_IMPORT_PRODUCT_REVIEWS = 'datafeed/product_attributes/other_fields/import_product_reviews';
-    const XML_PATH_ICECAT_IMPORT_REASON_TO_BUY = 'datafeed/product_attributes/other_fields/import_reasons_to_buy';
-    const XML_PATH_ICECAT_IMPORT_BULLET_POINTS = 'datafeed/product_attributes/other_fields/import_bullet_points';
+    protected const XML_PATH_ICECAT_DATAFEED_PRODUCT_ATTRIBUTE = 'datafeed/product_attributes/basic_fields/attributes';
 
-    const XML_PATH_ICECAT_DATAFEED_PRODUCT_ATTRIBUTE = 'datafeed/product_attributes/basic_fields/attributes';
+    protected const XML_PATH_LANGAUGE_CONFIG = 'general/locale/code';
 
-    const XML_PATH_LANGAUGE_CONFIG = 'general/locale/code';
-
-    const XML_PATH_TIMEZONE = 'general/locale/timezone';
+    protected const XML_PATH_TIMEZONE = 'general/locale/timezone';
     /**
      * @param Context $context
      * @param StoreManagerInterface $storeManager
@@ -78,6 +77,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return int
      * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * 
      */
     public function getStoreId()
     {

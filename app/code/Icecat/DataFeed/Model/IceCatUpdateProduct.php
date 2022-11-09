@@ -34,6 +34,7 @@ class IceCatUpdateProduct
     protected $_productAttachmentCollection;
     protected $_productReviewCollection;
     private File $file;
+    protected $scopeConfig;
     private $moduleDataSetup;
 
     /**
@@ -52,6 +53,7 @@ class IceCatUpdateProduct
      * @param ProductReviewFactory $productReview
      * @param ResourceModel\ProductReview\CollectionFactory $productReviewCollection
      * @param File $file
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      */
     public function __construct(
         ProductResourceModel                          $productResource,
@@ -68,7 +70,9 @@ class IceCatUpdateProduct
         CollectionFactory                             $productAttachmentCollection,
         ProductReviewFactory                          $productReview,
         ResourceModel\ProductReview\CollectionFactory $productReviewCollection,
-        File                                          $file
+        File                                          $file,
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+
     ) {
         $this->data = $data;
         $this->productResource = $productResource;
@@ -85,6 +89,8 @@ class IceCatUpdateProduct
         $this->_productReview = $productReview;
         $this->_productReviewCollection = $productReviewCollection;
         $this->file = $file;
+        $this->_scopeConfig = $scopeConfig;
+        
     }
 
 
@@ -129,20 +135,20 @@ class IceCatUpdateProduct
                                 </style>';
                 foreach ($productReasonsToBuy as $reasons) {
                     $reasonsHtml .= '<div class = "row-normal" >';
-                    if (isset($reasons['HighPic']) && (!empty($reasons['HighPic']))) :
-                        if ($flag === 'LEFT') :
+                    if (isset($reasons['HighPic']) && (!empty($reasons['HighPic']))):
+                        if ($flag === 'LEFT'):
                             $reasonsHtml .= ' <div class = "content-block"> <h5><b>' . $reasons['Title'] . '</b></h5>';
                             $reasonsHtml .= '<span>' . $reasons['Value'] . '</span></div>';
                             $reasonsHtml .= ' <div class="image-block"><img class = "image-left"  alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /></div>';
                             $flag = 'RIGHT';
-                        else :
+                        else:
                             $reasonsHtml .= '<div class = "image-block">  <img class = "image-right"  alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /> </div>';
                             $reasonsHtml .= '<div class = "content-block"><h5><b>' . $reasons['Title'] . '</b></h5>';
                             $reasonsHtml .= '<span>' . $reasons['Value'] . '</span></div>';
 
                             $flag = 'LEFT';
                         endif;
-                    else :
+                    else:
                         $reasonsHtml .= '<div class = "content-block"> <h5><b>' . $reasons['Title'] . '</b></h5>';
                         $reasonsHtml .= '<span>' . $reasons['Value'] . '</span></div>';
                     endif;
@@ -223,7 +229,7 @@ class IceCatUpdateProduct
                     $result = $this->file->read($image, $newFileName);
                     if ($result) {
                         if ($i == 0) {
-                            $product->addImageToMediaGallery($newFileName, array('image', 'small_image', 'thumbnail'), false, false);
+                            $product->addImageToMediaGallery($newFileName, ['image', 'small_image', 'thumbnail'], false, false);
                         } else {
                             $product->addImageToMediaGallery($newFileName, [], false, false);
                         }
@@ -239,7 +245,7 @@ class IceCatUpdateProduct
             if (count($productMultiMediaData) > 0) {
                 foreach ($productMultiMediaData as $multiMediaData) {
                     if ($multiMediaData['IsVideo']) {
-                        if (strpos($multiMediaData['URL'], 'youtube')) {
+                        if (strpos($multiMediaData['URL'], 'youtube') === 0) {
                             $videoData = [
                                 'video_id' => $multiMediaData['ID'], //set your video id
                                 'video_title' => $multiMediaData['Description'], //set your video title
@@ -354,7 +360,7 @@ class IceCatUpdateProduct
                 $specificationHtml .= '<div class="table">';
                 $specificationHtml .= '<div class="tableRow">';
 
-                $features               = array();
+                $features               = [];
                 $counting               = null;
                 $specficFeatureCount    = [];
                 $featureCount           = 0;
@@ -558,13 +564,13 @@ class IceCatUpdateProduct
     public function fetchOrCreateProductCategory($categoryName, $categoryId, $includeInMenu, $storeId)
     {
         // get the current stores root category
-        $connection = $this->moduleDataSetup->getConnection();
+        /* $connection = $this->moduleDataSetup->getConnection();
         $table      = $connection->getTableName('core_config_data');
         $category   = $connection->getConnection()
             ->query('SELECT value FROM ' . $table . ' WHERE path = "datafeed/icecat/root_category_id"')
             ->fetch();
-        $parentId   = $category['value'];
-
+        $parentId   = $category['value']; */
+        $parentId = $this->_scopeConfig->getValue('datafeed/icecat/root_category_id',\Magento\Store\Model\ScopeInterface::SCOPE_STORE);
         $parentCategory = $this->categoryFactory->create()->load($parentId);
 
         $category = $this->categoryFactory->create();

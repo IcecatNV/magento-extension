@@ -11,9 +11,9 @@ use Magento\Ui\Component\Form;
 
 class CustomTab extends AbstractModifier
 {
-    const GROUP_ATTACHMENT = 'attachments';
-    const GROUP_CONTENT = 'content';
-    const SORT_ORDER = 20;
+    protected const GROUP_ATTACHMENT = 'attachments';
+    protected const GROUP_CONTENT = 'content';
+    protected const SORT_ORDER = 20;
 
     protected $_backendUrl;
     protected $_productloader;

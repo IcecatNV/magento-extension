@@ -11,9 +11,9 @@ use Magento\Ui\Component\Form;
 
 class ReviewTab extends AbstractModifier
 {
-    const GROUP_ATTACHMENT = 'reviews';
-    const GROUP_CONTENT = 'content';
-    const SORT_ORDER = 30;
+    protected const GROUP_ATTACHMENT = 'reviews';
+    protected const GROUP_CONTENT = 'content';
+    protected const SORT_ORDER = 30;
 
     protected $_backendUrl;
     protected $_productloader;

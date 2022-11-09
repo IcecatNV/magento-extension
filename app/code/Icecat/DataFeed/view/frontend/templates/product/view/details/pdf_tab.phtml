@@ -3,17 +3,17 @@ $pdfCollectionData = $block->getProductAttachmentCollection();
 if ($pdfCollectionData->getSize() > 0) {
     foreach ($pdfCollectionData as $pdf) {
         $ext = pathinfo($pdf->getAttachmentFile(), PATHINFO_EXTENSION);
-        switch($ext){
-            case('pdf'):
+        switch ($ext) {
+            case ('pdf'):
                 $pdfIcon = 'pdf.png';
                 break;
-            case('docx'):
-            case('doc'):
+            case ('docx'):
+            case ('doc'):
                 $pdfIcon = 'doc.png';
                 break;
-            case('xlsx'):
-            case('xls'):
-            case('csv'):
+            case ('xlsx'):
+            case ('xls'):
+            case ('csv'):
                 $pdfIcon = 'xls.png';
                 break;
             default:
@@ -21,8 +21,8 @@ if ($pdfCollectionData->getSize() > 0) {
                 break;
         }
         ?>
-        <a href="<?= $this->getMediaUrl().$pdf->getAttachmentFile() ?>" target="_blank" style="display:inline-block;text-align:center;margin-right:30px">
-            <img src="<?php echo $this->getViewFileUrl('Icecat_DataFeed::images/'.$pdfIcon); ?>" title ="<?= $pdf->getTitle() ?>"/>
+        <a href="<?= $block->getMediaUrl().$pdf->getAttachmentFile() ?>" target="_blank" style="display:inline-block;text-align:center;margin-right:30px">
+            <img src="<?php echo $block->getViewFileUrl('Icecat_DataFeed::images/'.$pdfIcon); ?>" title ="<?= $pdf->getTitle() ?>"/>
             <span style="display: block;"><?= $pdf->getTitle() ?></span>
         </a>
     <?php } ?>
