@@ -150,27 +150,42 @@ class ProductData extends Action
                     $categoryFactory=$objectManager->get('\Magento\Catalog\Model\CategoryFactory');
                     $categoryTmp = $categoryFactory->create();
                     $categoryTmp->setName($name);
-                    $categoryTmp->setIsActive(false);
+                    $categoryTmp->setIsActive(true);
+                    $categoryTmp->setIncludeInMenu(false);
                     $categoryTmp->setUrlKey($cleanurl);
                     $categoryTmp->setData('description', 'description');
                     $categoryTmp->setParentId($rootCat->getId());
                     $categoryTmp->setStoreId($storeId);
                     $categoryTmp->setPath($rootCat->getPath());
                     $savedCategory = $categoryTmp->save();
-                    $newlycreatedId = $savedCategory->getId();
-                    $this->config->saveConfig('datafeed/icecat/root_category_id', $newlycreatedId, 'default', 0);
-                    $newAddedCatInfo = $rootCat->load($newlycreatedId);
-                    foreach ($storeArray as $store) {
-                        $storeData = $this->storeRepository->getById($store);
-                        $storeManager = $objectManager->get(StoreManagerInterface::class);
-                        /** @var GroupInterface $storeGroup */
-                        $storeGroup = $objectManager->get(GroupInterfaceFactory::class)->create()->load($storeData->getData('group_id'));
-                        $storeGroup->setRootCategoryId($newlycreatedId);
-                        $objectManager->get(GroupResource::class)->save($storeGroup);
-                    }
+                    $icecatCid = $savedCategory->getId();
+                    $this->config->saveConfig('datafeed/icecat/root_category_id', $icecatCid, 'default', 0);
+                }else{
+                    $categoryFactory = $objectManager->get('\Magento\Catalog\Model\CategoryFactory');
+                    $collection = $categoryFactory->create()->getCollection()->addAttributeToFilter('name',"Icecat Categories")->setPageSize(1);
+                    $icecatCid = $collection->getFirstItem()->getId();
                 }
+
+                $allstores = $this->storeRepository->getList();                
+                foreach ($allstores as $eachstore) {
+                    if ($eachstore->getCode() == 'admin') {
+                        continue;
+                    }
+                    $allstoreArr[] = $eachstore->getId();                
+                }
+                foreach ($allstoreArr as $eachstore) {
+                    $storeData = $this->storeRepository->getById($eachstore);
+                    $storeManager = $objectManager->get(StoreManagerInterface::class);
+                    $storeGroup = $objectManager->get(GroupInterfaceFactory::class)->create()->load($storeData->getData('group_id'));
+                    if(in_array($eachstore, $storeArray)){
+                        $storeGroup->setRootCategoryId($icecatCid);
+                    }else{
+                        $storeGroup->setRootCategoryId(2);
+                    }
+                    $objectManager->get(GroupResource::class)->save($storeGroup); 
+                }               
             }
-                       
+                                   
             foreach ($storeArray as $store) {
                 $product = $this->productRepository->getById($productId, false, $store);
                 $language = $this->data->getStoreLanguage($store);
