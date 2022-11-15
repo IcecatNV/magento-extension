@@ -239,7 +239,7 @@ class IceCatUpdateProduct
             if (count($productMultiMediaData) > 0) {
                 foreach ($productMultiMediaData as $multiMediaData) {
                     if ($multiMediaData['IsVideo']) {
-                        if (strpos($multiMediaData['URL'], 'youtube')) {
+                        if (strpos($multiMediaData['URL'], 'youtube') !== false) {
                             $videoData = [
                                 'video_id' => $multiMediaData['ID'], //set your video id
                                 'video_title' => $multiMediaData['Description'], //set your video title
