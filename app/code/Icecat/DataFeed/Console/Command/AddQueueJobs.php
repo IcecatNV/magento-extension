@@ -12,7 +12,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class AddQueueJobs extends Command
 {
-
     /** @var Data  */
     private $data;
 

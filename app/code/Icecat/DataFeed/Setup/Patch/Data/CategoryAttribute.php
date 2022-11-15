@@ -3,23 +3,22 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-declare (strict_types = 1);
+declare(strict_types = 1);
 
 namespace Icecat\DataFeed\Setup\Patch\Data;
 
+use Magento\Catalog\Model\Category;
 use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
 use Magento\Eav\Setup\EavSetup;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Magento\Catalog\Model\Category;
 
 /**
  * Class CategoryAttribute for Create Custom Category Attribute using Data Patch.
  */
 class CategoryAttribute implements DataPatchInterface
 {
-
     /**
      * ModuleDataSetupInterface
      *

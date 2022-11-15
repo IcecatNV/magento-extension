@@ -3,14 +3,13 @@ declare(strict_types=1);
 
 namespace Icecat\DataFeed\Setup\Patch\Schema;
 
-use Magento\Framework\Setup\Patch\SchemaPatchInterface;
 use Icecat\DataFeed\Model\AttributeCodes;
 use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
+use Magento\Framework\Setup\Patch\SchemaPatchInterface;
 
 class ConfigPatch implements SchemaPatchInterface
 {
-
     /**
      * @var ConfigInterface
      */
@@ -112,10 +111,8 @@ class ConfigPatch implements SchemaPatchInterface
             ->query('SELECT path, value FROM ' . $table . ' WHERE path LIKE "datafeed_%"')
             ->fetchAll(\PDO::FETCH_KEY_PAIR);
          */
-        $alreadyInserted = $this->_scopeConfig->getValue('datafeed_%',\Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        $alreadyInserted = $this->_scopeConfig->getValue('datafeed_%', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
         //$this->scopeConfig->getValue('path/of/config', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-
-            
 
         foreach ($this->defaultConfigData as $path => $value) {
             if (isset($alreadyInserted[$path])) {

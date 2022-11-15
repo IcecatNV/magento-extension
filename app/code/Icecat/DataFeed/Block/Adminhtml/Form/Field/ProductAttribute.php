@@ -10,6 +10,7 @@ use Icecat\DataFeed\Block\Adminhtml\Form\Field\AttributeColumn;
 use Icecat\DataFeed\Block\Adminhtml\Form\Field\OverrideArrtibuteColumn;
 use Icecat\DataFeed\Block\Adminhtml\Form\Field\IcecatAttributeColumn;
 
+
 class ProductAttribute extends AbstractFieldArray
 {
     /**

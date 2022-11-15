@@ -16,7 +16,6 @@ class Statistics extends Field
     private Queue $queue;
     private Filesystem $filesystem;
 
-
     /**
      * @param Context $context
      * @param Queue $queue
@@ -91,7 +90,7 @@ class Statistics extends Field
                 $contents           .= $value['error_log'];
             }
             if (!empty($value['product_ids_with_missing_gtin_product_code'])) {
-                $data['missing_gtin'] .= $value['product_ids_with_missing_gtin_product_code'].",";
+                $data['missing_gtin'] .= $value['product_ids_with_missing_gtin_product_code'] . ",";
             }
 
             if (!empty($value['product_ids'])) {
@@ -125,7 +124,7 @@ class Statistics extends Field
         if (!empty($data['missing_gtin'])) {
             foreach (explode(',', rtrim($data['missing_gtin'], ",")) as $p_id) {
                 $details                = new stdClass();
-                $details->message       = "Product(s) ids ".$p_id." with missing GTIN, Brand and Product Code";
+                $details->message       = "Product(s) ids " . $p_id . " with missing GTIN, Brand and Product Code";
                 $details->gtin          = null;
                 $details->brand         = null;
                 $details->product_code  = null;
@@ -144,7 +143,7 @@ class Statistics extends Field
 
     public function getCSV($contents, $logFileName)
     {
-        $filepath   = 'icecatLogs/'.$logFileName;
+        $filepath   = 'icecatLogs/' . $logFileName;
         $varFolder  = $this->filesystem->getDirectoryWrite(DirectoryList::MEDIA);
         $stream     = $varFolder->openFile($filepath, 'w+');
         $stream->lock();
@@ -159,7 +158,7 @@ class Statistics extends Field
             $itemData[] = $item->product_code;
             $stream->writeCsv($itemData);
         }
-        $fileUrl    = DIRECTORY_SEPARATOR. DirectoryList::MEDIA. DIRECTORY_SEPARATOR. 'icecatLogs' . DIRECTORY_SEPARATOR . $logFileName;
+        $fileUrl    = DIRECTORY_SEPARATOR . DirectoryList::MEDIA . DIRECTORY_SEPARATOR . 'icecatLogs' . DIRECTORY_SEPARATOR . $logFileName;
         return $fileUrl;
     }
 }

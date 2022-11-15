@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Icecat\DataFeed\Block\Adminhtml\Form\Field;
 
-use Magento\Config\Block\System\Config\Form\Field;
-use Magento\Framework\Registry;
 use Magento\Backend\Block\Template\Context;
+use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Framework\Data\Form\Element\AbstractElement;
+use Magento\Framework\Registry;
 
 class Color extends Field
 {

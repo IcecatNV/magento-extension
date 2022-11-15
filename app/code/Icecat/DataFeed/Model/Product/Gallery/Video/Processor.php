@@ -9,11 +9,11 @@ use Magento\Catalog\Model\Product\Gallery\CreateHandler;
 use Magento\Catalog\Model\Product\Media\Config;
 use Magento\Catalog\Model\ResourceModel\Product\Gallery;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Mime;
 use Magento\Framework\Filesystem;
-use Magento\MediaStorage\Helper\File\Storage\Database;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem\Io\File;
+use Magento\MediaStorage\Helper\File\Storage\Database;
 
 class Processor extends \Magento\Catalog\Model\Product\Gallery\Processor
 {
@@ -76,8 +76,8 @@ class Processor extends \Magento\Catalog\Model\Product\Gallery\Processor
         if (!empty($videoData['thumbnail_url'])) {
             $saveDir = $this->getVideoThumbnailSaveDir();
             /** @var string $newFileName */
-            $newFileName = $saveDir .$productId.'_'.$storeId.'_'.baseName($videoData['thumbnail_url']);
-            $finalName = $productId.'_'.$storeId.'_'.baseName($videoData['thumbnail_url']);
+            $newFileName = $saveDir . $productId . '_' . $storeId . '_' . baseName($videoData['thumbnail_url']);
+            $finalName = $productId . '_' . $storeId . '_' . baseName($videoData['thumbnail_url']);
             /** read file from URL and copy it to the new destination */
             $result = $this->file->read($videoData['thumbnail_url'], $newFileName);
         } else {

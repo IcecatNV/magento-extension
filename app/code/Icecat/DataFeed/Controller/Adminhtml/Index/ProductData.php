@@ -4,22 +4,22 @@ declare(strict_types=1);
 namespace Icecat\DataFeed\Controller\Adminhtml\Index;
 
 use Icecat\DataFeed\Helper\Data;
-use Icecat\DataFeed\Service\IcecatApiService;
 use Icecat\DataFeed\Model\IceCatUpdateProduct;
+use Icecat\DataFeed\Service\IcecatApiService;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Catalog\Model\Product\Gallery\Processor;
 use Magento\Catalog\Model\ProductRepository;
+use Magento\Eav\Model\Config;
+use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\ObjectManagerInterface;
-use Magento\Store\Api\StoreRepositoryInterface;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Eav\Model\Config;
-use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Magento\Store\Api\Data\GroupInterfaceFactory;
+use Magento\Store\Api\StoreRepositoryInterface;
 use Magento\Store\Model\ResourceModel\Group as GroupResource;
+use Magento\Store\Model\StoreManagerInterface;
 
 class ProductData extends Action
 {
@@ -103,14 +103,14 @@ class ProductData extends Action
             $storeArrayForImage = explode(',', $icecatStores);
             //$storeArray[] = 0; // Admin store
             $storeArrayForImage[] = 0; // Admin store
-            $updatedStore = array();
+            $updatedStore = [];
             $errorMessage = null;
             $globalImageArray = [];
             foreach ($storeArrayForImage as $store) {
                 if ($this->data->isImportImagesEnabled()) {
                     $product = $this->productRepository->getById($productId, false, $store);
                     $images = $product->getMediaGalleryImages();
-                    $mediaTypeArray = array('image', 'small_image', 'thumbnail');
+                    $mediaTypeArray = ['image', 'small_image', 'thumbnail'];
                     $this->processor->clearMediaAttribute($product, $mediaTypeArray);
                     $existingMediaGalleryEntries = $product->getMediaGalleryEntries();
                     foreach ($existingMediaGalleryEntries as $key => $entry) {
@@ -124,20 +124,19 @@ class ProductData extends Action
                 }
             }
             // Check for icecat root category from all root categories, create it if not there
-            $rootCats = array();
+            $rootCats = [];
             if ($this->data->isCategoryImportEnabled()) {
                 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
                 $collection = $objectManager->get('\Magento\Catalog\Model\ResourceModel\Category\CollectionFactory')->create();
-                $collection->addAttributeToFilter('level', array('eq' => 1));
+                $collection->addAttributeToFilter('level', ['eq' => 1]);
                 foreach ($collection as $coll) {
-                    $rootCatId = $coll->getId();                    
+                    $rootCatId = $coll->getId();
                     $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
                     $rootCatData = $rootCat->load($rootCatId);
                     $rootCats[] = strtolower($rootCatData->getName());
                 }
                 $myRoot=strtolower('Icecat Categories');
-                if(!in_array($myRoot,$rootCats))
-                {
+                if (!in_array($myRoot, $rootCats)) {
                     $store = $this->storeManager->getStore();
                     $storeId = $store->getStoreId();
                     $rootNodeId = 1;
@@ -160,32 +159,32 @@ class ProductData extends Action
                     $savedCategory = $categoryTmp->save();
                     $icecatCid = $savedCategory->getId();
                     $this->config->saveConfig('datafeed/icecat/root_category_id', $icecatCid, 'default', 0);
-                }else{
+                } else {
                     $categoryFactory = $objectManager->get('\Magento\Catalog\Model\CategoryFactory');
-                    $collection = $categoryFactory->create()->getCollection()->addAttributeToFilter('name',"Icecat Categories")->setPageSize(1);
+                    $collection = $categoryFactory->create()->getCollection()->addAttributeToFilter('name', "Icecat Categories")->setPageSize(1);
                     $icecatCid = $collection->getFirstItem()->getId();
                 }
 
-                $allstores = $this->storeRepository->getList();                
+                $allstores = $this->storeRepository->getList();
                 foreach ($allstores as $eachstore) {
                     if ($eachstore->getCode() == 'admin') {
                         continue;
                     }
-                    $allstoreArr[] = $eachstore->getId();                
+                    $allstoreArr[] = $eachstore->getId();
                 }
                 foreach ($allstoreArr as $eachstore) {
                     $storeData = $this->storeRepository->getById($eachstore);
                     $storeManager = $objectManager->get(StoreManagerInterface::class);
                     $storeGroup = $objectManager->get(GroupInterfaceFactory::class)->create()->load($storeData->getData('group_id'));
-                    if(in_array($eachstore, $storeArray)){
+                    if (in_array($eachstore, $storeArray)) {
                         $storeGroup->setRootCategoryId($icecatCid);
-                    }else{
+                    } else {
                         $storeGroup->setRootCategoryId(2);
                     }
-                    $objectManager->get(GroupResource::class)->save($storeGroup); 
-                }               
+                    $objectManager->get(GroupResource::class)->save($storeGroup);
+                }
             }
-                                   
+
             foreach ($storeArray as $store) {
                 $product = $this->productRepository->getById($productId, false, $store);
                 $language = $this->data->getStoreLanguage($store);
@@ -206,9 +205,9 @@ class ProductData extends Action
                 }
             }
             if ($this->columnExists === false) {
-                $query = "select * from " . $this->galleryEntitytable. " A left join ". $this->galleryTable. " B on B.value_id = A.value_id where A.row_id=".$productId. " and B.media_type='image'";
+                $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id where A.row_id=" . $productId . " and B.media_type='image'";
             } else {
-                $query = "select * from " . $this->galleryEntitytable. " A left join ". $this->galleryTable. " B on B.value_id = A.value_id where A.entity_id=".$productId. " and B.media_type='image'";
+                $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id where A.entity_id=" . $productId . " and B.media_type='image'";
             }
             $data = $this->db->query($query)->fetchAll();
             foreach ($globalImageArray as $key => $imageArray) {
@@ -218,7 +217,7 @@ class ProductData extends Action
                     foreach ($data as $k => $value) {
                         if ($key != $value['store_id']) {
                             if (strpos($value['value'], $imageName) !== false) {
-                                $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=".$value['store_id'];
+                                $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=" . $value['store_id'];
                                 $this->db->query($updateQuery);
                             }
                         }

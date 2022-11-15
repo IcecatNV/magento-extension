@@ -38,7 +38,6 @@ class ReviewTab extends AbstractModifier
      */
     protected $meta = [];
 
-
     /**
      * @param LocatorInterface $locator
      * @param ArrayManager $arrayManager
@@ -115,12 +114,11 @@ class ReviewTab extends AbstractModifier
                         'collapsible' => true,
                         'opened' => false,
                         'componentType' => Form\Fieldset::NAME,
-                        'sortOrder' =>
-                            $this->getNextGroupSortOrder(
-                                $meta,
-                                static::GROUP_CONTENT,
-                                static::SORT_ORDER
-                            ),
+                        'sortOrder' => $this->getNextGroupSortOrder(
+                            $meta,
+                            static::GROUP_CONTENT,
+                            static::SORT_ORDER
+                        ),
                     ],
                 ],
             ],

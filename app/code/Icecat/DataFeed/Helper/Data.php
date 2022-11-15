@@ -77,7 +77,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return int
      * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * 
+     *
      */
     public function getStoreId()
     {

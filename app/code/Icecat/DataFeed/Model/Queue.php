@@ -65,7 +65,6 @@ class Queue
     /** @var int */
     private $noOfFailedJobs = 0;
 
-
     /**
      * @param CollectionFactory $collectionFactory
      * @param ResourceConnection $resourceConnection
@@ -269,9 +268,10 @@ class Queue
                             if (!empty($response) && !empty($response['Code'])) {
                                 $errorMessage       = $this->errorMessageResponse($response, $product);
                                 $errorProductIds[]  = $productId;
-                                $errorLog['Product ID-'.$productId] = $errorMessage;
+                                $errorLog['Product ID-' . $productId] = $errorMessage;
                             } else {
-                                $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store);
+                                $test['image']='abc.png ';
+                                $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $test);
                                 $successProducts[] = $productId;
                             }
                         } else {
@@ -279,9 +279,9 @@ class Queue
                         }
                     }
                     if ($this->columnExists === false) {
-                        $query = "select * from " . $this->galleryEntitytable. " A left join ". $this->galleryTable. " B on B.value_id = A.value_id where A.row_id=".$productId. " and B.media_type='image'";
+                        $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id where A.row_id=" . $productId . " and B.media_type='image'";
                     } else {
-                        $query = "select * from " . $this->galleryEntitytable. " A left join ". $this->galleryTable. " B on B.value_id = A.value_id where A.entity_id=".$productId. " and B.media_type='image'";
+                        $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id where A.entity_id=" . $productId . " and B.media_type='image'";
                     }
                     $data = $this->db->query($query)->fetchAll();
                     foreach ($globalImageArray as $key => $imageArray) {
@@ -291,7 +291,7 @@ class Queue
                             foreach ($data as $k => $value) {
                                 if ($key != $value['store_id']) {
                                     if (strpos($value['value'], $imageName) !== false) {
-                                        $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=".$value['store_id'];
+                                        $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=" . $value['store_id'];
                                         $this->db->query($updateQuery);
                                     }
                                 }
@@ -471,6 +471,7 @@ class Queue
     }
 
     /**
+     *
      * @return array
      * @throws Zend_Db_Statement_Exception
      */

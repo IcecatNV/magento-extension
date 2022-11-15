@@ -37,7 +37,7 @@ class CheckImportProgress extends Action
     {
         $result = $this->scheduler->fetchInprogressScheduleRecord();
         if ($result) {
-            $message = 'Full import corn is in progress...';
+            $message = 'Full import cron is in progress...';
             if ($result['type'] == 'new_import') {
                 $message = 'Delta import corn is in progress...';
             }

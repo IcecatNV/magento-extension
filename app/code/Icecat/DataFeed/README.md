@@ -15,6 +15,7 @@ To install this plugin use following commands:
 - DI compilation - bin/magento setup:di:compile
 - Static content deploy - bin/magento setup:static-content:deploy
 - Cache cleaning - bin/magento cache:clean
+- Install cron package : composer require dragonmantank/cron-expression": "^v3.3.2"
 
 **Features in a nutshell**
 - Helpful Icecat links on the login screen.

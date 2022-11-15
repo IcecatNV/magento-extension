@@ -6,7 +6,6 @@ namespace Icecat\DataFeed\Model;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\ObjectManagerInterface;
-use Zend_Db_Expr;
 use Zend_Db_Statement_Exception;
 
 class Scheduler
@@ -99,7 +98,6 @@ class Scheduler
             ->order('id ASC');
         return $this->db->query($query)->fetch();
     }
-
 
     /**
      * @return array

@@ -21,8 +21,8 @@ if ($pdfCollectionData->getSize() > 0) {
                 break;
         }
         ?>
-        <a href="<?= $block->getMediaUrl().$pdf->getAttachmentFile() ?>" target="_blank" style="display:inline-block;text-align:center;margin-right:30px">
-            <img src="<?php echo $block->getViewFileUrl('Icecat_DataFeed::images/'.$pdfIcon); ?>" title ="<?= $pdf->getTitle() ?>"/>
+        <a href="<?= $block->getMediaUrl() . $pdf->getAttachmentFile() ?>" target="_blank" style="display:inline-block;text-align:center;margin-right:30px">
+            <img src="<?php echo $block->getViewFileUrl('Icecat_DataFeed::images/' . $pdfIcon); ?>" title ="<?= $pdf->getTitle() ?>"/>
             <span style="display: block;"><?= $pdf->getTitle() ?></span>
         </a>
     <?php } ?>

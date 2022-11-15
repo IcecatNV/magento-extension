@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Icecat\DataFeed\Block\Adminhtml\Form\Field;
 
 use Magento\Eav\Model\Config;
-use Magento\Framework\View\Element\Html\Select;
 use Magento\Framework\View\Element\Context;
+use Magento\Framework\View\Element\Html\Select;
 
 class AttributeColumn extends Select
 {

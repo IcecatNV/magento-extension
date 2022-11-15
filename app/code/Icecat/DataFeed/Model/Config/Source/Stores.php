@@ -15,7 +15,6 @@ class Stores implements ArrayInterface
     public function __construct(
         StoreRepositoryInterface $storeRepository
     ) {
-
         $this->storeRepository = $storeRepository;
     }
     public function toOptionArray()

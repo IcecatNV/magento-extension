@@ -5,19 +5,20 @@ namespace Icecat\DataFeed\Model;
 
 use Icecat\DataFeed\Helper\Data;
 use Icecat\DataFeed\Model\Product\Gallery\Video\Processor as VideoProcessor;
-use Icecat\DataFeed\Model\AttributeCodes;
 use Icecat\DataFeed\Model\ResourceModel\ProductAttachment\CollectionFactory;
+use Magento\Catalog\Api\CategoryLinkManagementInterface;
+use Magento\Catalog\Model\CategoryFactory;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Gallery\Processor;
 use Magento\Catalog\Model\ResourceModel\Product as ProductResourceModel;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Catalog\Model\CategoryFactory;
-use Magento\Catalog\Api\CategoryLinkManagementInterface;
 use Magento\Framework\Filesystem\Io\File;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use Icecat\DataFeed\Model\AttributeCodes;
+
 
 class IceCatUpdateProduct
 {
@@ -87,12 +88,11 @@ class IceCatUpdateProduct
         $this->file = $file;
     }
 
-
     public function updateProductWithIceCatResponse(Product $product, $response, $storeId, $globalImageArray)
     {
         $tmpMediaDir = $this->getMediaDir();
-        if (!file_exists($tmpMediaDir."/tmp")) {
-            mkdir($tmpMediaDir."/tmp", 0755, true);
+        if (!file_exists($tmpMediaDir . "/tmp")) {
+            mkdir($tmpMediaDir . "/tmp", 0755, true);
         }
 
         $product->setStoreId($storeId);
@@ -129,20 +129,20 @@ class IceCatUpdateProduct
                                 </style>';
                 foreach ($productReasonsToBuy as $reasons) {
                     $reasonsHtml .= '<div class = "row-normal" >';
-                    if (isset($reasons['HighPic']) && (!empty($reasons['HighPic']))) :
-                        if ($flag === 'LEFT') :
+                    if (isset($reasons['HighPic']) && (!empty($reasons['HighPic']))):
+                        if ($flag === 'LEFT'):
                             $reasonsHtml .= ' <div class = "content-block"> <h5><b>' . $reasons['Title'] . '</b></h5>';
                             $reasonsHtml .= '<span>' . $reasons['Value'] . '</span></div>';
                             $reasonsHtml .= ' <div class="image-block"><img class = "image-left"  alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /></div>';
                             $flag = 'RIGHT';
-                        else :
+                        else:
                             $reasonsHtml .= '<div class = "image-block">  <img class = "image-right"  alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /> </div>';
                             $reasonsHtml .= '<div class = "content-block"><h5><b>' . $reasons['Title'] . '</b></h5>';
                             $reasonsHtml .= '<span>' . $reasons['Value'] . '</span></div>';
 
                             $flag = 'LEFT';
                         endif;
-                    else :
+                    else:
                         $reasonsHtml .= '<div class = "content-block"> <h5><b>' . $reasons['Title'] . '</b></h5>';
                         $reasonsHtml .= '<span>' . $reasons['Value'] . '</span></div>';
                     endif;
@@ -198,8 +198,8 @@ class IceCatUpdateProduct
                     if ($data['URL'] != "") {
                         $pathinfo = pathinfo($data['URL']);
                         $html = file_get_contents($data['URL']);
-                        $html = preg_replace("/src=\"/", 'src="'.$pathinfo['dirname'].'/', $html);
-                        $html = preg_replace("/href=\"/", 'href="'.$pathinfo['dirname'].'/', $html);
+                        $html = preg_replace("/src=\"/", 'src="' . $pathinfo['dirname'] . '/', $html);
+                        $html = preg_replace("/href=\"/", 'href="' . $pathinfo['dirname'] . '/', $html);
                     }
                 }
                 $product->setData(AttributeCodes::ICECAT_PRODUCT_ATTRIBUTE_PRODUCT_STORIES, $html);
@@ -216,14 +216,14 @@ class IceCatUpdateProduct
                     $image = $imageData['Pic'];
 
                     $tmpDir = $this->getMediaDirTmpDir();
-                    $imageName = $product->getId().'_'.$storeId.'_'.baseName($image);
+                    $imageName = $product->getId() . '_' . $storeId . '_' . baseName($image);
                     /** create folder if it is not exists */
                     $newFileName = $tmpDir . $imageName;
                     /** read file from URL and copy it to the new destination */
                     $result = $this->file->read($image, $newFileName);
                     if ($result) {
                         if ($i == 0) {
-                            $product->addImageToMediaGallery($newFileName, array('image', 'small_image', 'thumbnail'), false, false);
+                            $product->addImageToMediaGallery($newFileName, ['image', 'small_image', 'thumbnail'], false, false);
                         } else {
                             $product->addImageToMediaGallery($newFileName, [], false, false);
                         }
@@ -280,7 +280,7 @@ class IceCatUpdateProduct
                 foreach ($productMultiMediaData as $multiMediaData) {
                     if (!$multiMediaData['IsVideo']) {
                         $currentStore   = $this->storeManager->getStore($storeId);
-                        $destinationPath = $tmpMediaDir.'/doc/'.$currentStore->getId().'/'.$product->getId().'/';
+                        $destinationPath = $tmpMediaDir . '/doc/' . $currentStore->getId() . '/' . $product->getId() . '/';
                         if (!file_exists($destinationPath)) {
                             mkdir($destinationPath, 0755, true);
                         }
@@ -292,7 +292,7 @@ class IceCatUpdateProduct
                         /** @var string $newFileName */
                         $newFileName    = $destinationPath . baseName($pdf);
                         $result         = $this->file->read($pdf, $newFileName);
-                        $relativePath   = 'doc/'.$currentStore->getId().'/'.$product->getId().'/'. $pdfName;
+                        $relativePath   = 'doc/' . $currentStore->getId() . '/' . $product->getId() . '/' . $pdfName;
                         $pdfDetails     = [
                             'product_id'        => $product->getId(),
                             'attachment_file'   => $relativePath,
@@ -317,7 +317,7 @@ class IceCatUpdateProduct
                 }
 
                 .tableRowHead h3 {
-                    background: '.$this->data->getSpecificationHeaderColor().';
+                    background: ' . $this->data->getSpecificationHeaderColor() . ';
                     margin: 0;
                     padding: 5px;
                     font-size: 16px;
@@ -354,7 +354,7 @@ class IceCatUpdateProduct
                 $specificationHtml .= '<div class="table">';
                 $specificationHtml .= '<div class="tableRow">';
 
-                $features               = array();
+                $features               = [];
                 $counting               = null;
                 $specficFeatureCount    = [];
                 $featureCount           = 0;
@@ -395,17 +395,17 @@ class IceCatUpdateProduct
                 foreach ($arrayFirst as $key => $value) {
                     $specificationHtml .= '<div>';
                     $specificationHtml .= '<div class="tableRowHead row">';
-                    $specificationHtml .= '<h3>'.$key.'</h3>';
+                    $specificationHtml .= '<h3>' . $key . '</h3>';
                     $specificationHtml .= '</div>';
                     foreach ($value as $val) {
                         $specificationHtml .= '<div class="row inner-data">';
                         $specificationHtml .= '<div class="ds_label">';
-                        $specificationHtml .= '<span title="'.$val['featureDescription'].'">'.$val['featureName'].'</span>';
+                        $specificationHtml .= '<span title="' . $val['featureDescription'] . '">' . $val['featureName'] . '</span>';
                         $specificationHtml .= (!empty($val['mandatory'])) ? '<span>*</span>' : '';
                         $specificationHtml .= '</div>';
                         $featureStyle       = ($val['featureValue'] == 'Y') ? 'style="color: green;"' : (($val['featureValue'] == 'N') ? 'style="color: red;"' : '');
                         $featureValue       = ($val['featureValue'] == 'Y') ? '&#x2713;' : (($val['featureValue'] == 'N') ? '&#10005;' : $val['featureValue']);
-                        $specificationHtml .= '<div class="ds_data" '.$featureStyle.'>'.$featureValue.'</div>';
+                        $specificationHtml .= '<div class="ds_data" ' . $featureStyle . '>' . $featureValue . '</div>';
                         $specificationHtml .= '</div>';
                     }
                     $specificationHtml .= '</div>';
@@ -419,17 +419,17 @@ class IceCatUpdateProduct
                 foreach ($arraySecond as $key => $value) {
                     $specificationHtml .= '<div>';
                     $specificationHtml .= '<div class="tableRowHead row">';
-                    $specificationHtml .= '<h3>'.$key.'</h3>';
+                    $specificationHtml .= '<h3>' . $key . '</h3>';
                     $specificationHtml .= '</div>';
                     foreach ($value as $val) {
                         $specificationHtml .= '<div class="row inner-data">';
                         $specificationHtml .= '<div class="ds_label">';
-                        $specificationHtml .= '<span title="'.$val['featureDescription'].'">'.$val['featureName'].'</span>';
+                        $specificationHtml .= '<span title="' . $val['featureDescription'] . '">' . $val['featureName'] . '</span>';
                         $specificationHtml .= (!empty($val['mandatory'])) ? '<span>*</span>' : '';
                         $specificationHtml .= '</div>';
                         $featureStyle       = ($val['featureValue'] == 'Y') ? 'style="color: green;"' : (($val['featureValue'] == 'N') ? 'style="color: red;"' : '');
                         $featureValue       = ($val['featureValue'] == 'Y') ? '&#x2713;' : (($val['featureValue'] == 'N') ? '&#10005;' : $val['featureValue']);
-                        $specificationHtml .= '<div class="ds_data" '.$featureStyle.'>'.$featureValue.'</div>';
+                        $specificationHtml .= '<div class="ds_data" ' . $featureStyle . '>' . $featureValue . '</div>';
                         $specificationHtml .= '</div>';
                     }
                     $specificationHtml .= '</div>';

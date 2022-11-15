@@ -8,7 +8,6 @@ use Magento\Framework\Model\AbstractModel;
 
 class ProductAttachment extends AbstractModel implements IdentityInterface
 {
-
     protected const CACHE_TAG = 'icecat_product_attachment';
 
     protected $_cacheTag = 'icecat_product_attachment';

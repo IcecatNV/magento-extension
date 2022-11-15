@@ -8,7 +8,6 @@ use Magento\Framework\Model\AbstractModel;
 
 class ProductReview extends AbstractModel implements IdentityInterface
 {
-
     protected const CACHE_TAG = 'icecat_product_review';
 
     protected $_cacheTag = 'icecat_product_review';

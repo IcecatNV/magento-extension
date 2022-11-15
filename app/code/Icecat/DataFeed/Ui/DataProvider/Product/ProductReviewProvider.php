@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace Icecat\DataFeed\Ui\DataProvider\Product;
 
-use Magento\Ui\DataProvider\AbstractDataProvider;
-use Magento\Framework\App\RequestInterface;
 use Icecat\DataFeed\Model\ResourceModel\ProductReview\CollectionFactory;
-use Icecat\DataFeed\Model\ResourceModel\ProductReview\Collection;
+use Magento\Framework\App\RequestInterface;
+use Magento\Ui\DataProvider\AbstractDataProvider;
 
 class ProductReviewProvider extends AbstractDataProvider
 {
@@ -14,7 +13,6 @@ class ProductReviewProvider extends AbstractDataProvider
      * @var CollectionFactory
      */
     protected $collectionFactory;
-
 
     /**
      * @var RequestInterface

@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Icecat\DataFeed\Block\Adminhtml\System\Config;
 
-use Magento\Config\Block\System\Config\Form\Field;
-use Magento\Framework\Data\Form\Element\AbstractElement;
 use Icecat\DataFeed\Helper\Data;
 use Magento\Backend\Block\Template\Context;
+use Magento\Config\Block\System\Config\Form\Field;
+use Magento\Framework\Data\Form\Element\AbstractElement;
 
 class Authenticate extends Field
 {
@@ -82,7 +82,7 @@ class Authenticate extends Field
     {
         $curl = curl_init();
         curl_setopt_array($curl, [
-            CURLOPT_URL => 'https://live.icecat.biz/api/?UserName='.$this->data->getUsername().'type&Language=en&gtin=5397063929863',
+            CURLOPT_URL => 'https://live.icecat.biz/api/?UserName=' . $this->data->getUsername() . 'type&Language=en&gtin=5397063929863',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -91,7 +91,7 @@ class Authenticate extends Field
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'GET',
             CURLOPT_HTTPHEADER => [
-                'api-token: '.$this->data->getAccessToken()
+                'api-token: ' . $this->data->getAccessToken()
             ],
 
         ]);

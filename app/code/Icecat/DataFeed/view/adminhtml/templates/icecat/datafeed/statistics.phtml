@@ -21,8 +21,7 @@ $configTimezone = new DateTimeZone($timezone);
                         echo $datetime->format('Y-m-d H:i:s');
                     } else {
                         echo '0';
-                    }
-                    ?>
+                    }?>
                 </td>
             </tr>
             <tr>
@@ -36,82 +35,82 @@ $configTimezone = new DateTimeZone($timezone);
                     } else {
                         echo '0';
                     }
-                    ?>
+?>
                 </td>
             </tr>
             <tr>
                 <td><strong><?php print "Total records found in Magento"; ?>:</strong></td>
                 <td>
                     <?php
-                    if (!empty($import_info['total_record'])) {
-                        echo $import_info['total_record'];
-                    } else {
-                        echo '0';
-                    }
-                    ?>
+                        if (!empty($import_info['total_record'])) {
+                            echo $import_info['total_record'];
+                        } else {
+                            echo '0';
+                        }
+                        ?>
                 </td>
             </tr>
             <tr>
                 <td><strong><?php print "Successfully processed"; ?>:</strong></td>
                 <td>
                     <?php
-                    if (!empty($import_info['success_record'])) {
-                        echo $import_info['success_record'];
-                    } else {
-                        echo '0';
-                    }
-                    ?>
+if (!empty($import_info['success_record'])) {
+    echo $import_info['success_record'];
+} else {
+    echo '0';
+}
+?>
                 </td>
             </tr>
             <tr>
                 <td><strong><?php print "Not found in Icecat"; ?>:</strong></td>
                 <td>
                     <?php
-                    if (!empty($import_info['not_found'])) {
-                        echo count(explode(',', $import_info['not_found']));
-                    } else {
-                        echo '0';
-                    }
-                    ?>
+if (!empty($import_info['not_found'])) {
+    echo count(explode(',', $import_info['not_found']));
+} else {
+    echo '0';
+}
+?>
                 </td>
             </tr>
             <tr>
                 <td><strong><?php print "Missing Icecat attribute values"; ?>:</strong></td>
                 <td>
                     <?php
-                    if (!empty($import_info['missing_gtin'])) {
-                        $productCount = count(explode(',', rtrim($import_info['missing_gtin'], ",")));
-                        echo $productCount;
-                    } else {
-                        echo '0';
-                    }
-                    ?>
+if (!empty($import_info['missing_gtin'])) {
+    $productCount = count(explode(',', rtrim($import_info['missing_gtin'], ",")));
+    echo $productCount;
+} else {
+    echo '0';
+}
+?>
                 </td>
             </tr>
             <tr>
                 <td><strong><?php print "Excecution type"; ?>:</strong></td>
                 <td>
                     <?php
-                    if (!empty($import_info['execution_type'])) {
-                        echo ucwords($import_info['execution_type']);
-                    } else {
-                        echo 'Import was not completed';
-                    }
-                    ?>
+if (!empty($import_info['execution_type'])) {
+    echo ucwords($import_info['execution_type']);
+} else {
+    echo 'Import was not completed';
+}
+?>
                 </td>
             </tr>
             <tr>
                 <td><strong><?php print "Detailed Log File"; ?>:</strong></td>
                 <td>
                     <?php
-                    if (!empty($import_info['log_url'])) {
-                        ?>
+if (!empty($import_info['log_url'])) {
+    ?>
                         <a href="<?= $import_info['log_url'] ?>" download>Download</a>
                         <?php
-                    } else {
-                        echo '&nbsp';
-                    }
-                    ?>
+} else {
+    echo '&nbsp';
+}
+?>
                 </td>
             </tr>
         </tbody>

@@ -3,7 +3,6 @@ namespace Icecat\DataFeed\Block;
 
 class ProductAttachment extends \Magento\Framework\View\Element\Template
 {
-
     protected $_productAttachmentCollection;
     protected $registry;
 

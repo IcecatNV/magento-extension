@@ -5,13 +5,11 @@ namespace Icecat\DataFeed\Model\Config\Backend\Serialized;
 
 use Magento\Catalog\Model\Product;
 use Magento\Eav\Api\AttributeRepositoryInterface;
+use Magento\Eav\Setup\EavSetupFactory;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Eav\Setup\EavSetup;
-use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
-use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
 
 class ArraySerialized extends \Magento\Config\Model\Config\Backend\Serialized
 {

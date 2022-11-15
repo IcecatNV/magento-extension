@@ -38,30 +38,30 @@
             </argument>
         </arguments>
     </virtualType>
-   <!--  <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
                 <item name="icecat_queue_report_listing_data_source" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueue\Grid\Collection</item>
             </argument>
         </arguments>
-    </type> -->
+    </type> 
     <virtualType name="Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueue\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
-        <arguments>
+        <arguments> 
             <argument name="mainTable" xsi:type="string">icecat_datafeed_queue</argument>
             <argument name="resourceModel" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueue</argument>
         </arguments>
     </virtualType>
-    <!-- <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
                 <item name="icecat_queue_log_report_listing_data_source" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueueLog\Grid\Collection</item>
             </argument>
         </arguments>
-    </type> -->
- <!--    <virtualType name="Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueueLog\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+    </type>
+     <virtualType name="Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueueLog\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
         <arguments>
             <argument name="mainTable" xsi:type="string">icecat_datafeed_queue_log</argument>
             <argument name="resourceModel" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueueLog</argument>
         </arguments>
-    </virtualType> -->
+    </virtualType>
 </config>

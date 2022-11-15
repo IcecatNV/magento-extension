@@ -4,14 +4,13 @@ declare(strict_types=1);
 namespace Icecat\DataFeed\Controller\Adminhtml\Index;
 
 use Icecat\DataFeed\Helper\Data;
-use Icecat\DataFeed\Service\IcecatApiService;
 use Icecat\DataFeed\Model\IceCatUpdateProduct;
+use Icecat\DataFeed\Model\ProductReviewFactory;
+use Icecat\DataFeed\Service\IcecatApiService;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Catalog\Model\ProductRepository;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\StoreRepositoryInterface;
-use \Icecat\DataFeed\Model\ProductReviewFactory;
 
 class DeleteReview extends Action
 {

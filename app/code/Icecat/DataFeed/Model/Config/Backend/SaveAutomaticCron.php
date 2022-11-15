@@ -5,11 +5,11 @@ namespace Icecat\DataFeed\Model\Config\Backend;
 
 use Icecat\DataFeed\Model\Scheduler;
 use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 
 class SaveAutomaticCron extends \Magento\Framework\App\Config\Value
 {

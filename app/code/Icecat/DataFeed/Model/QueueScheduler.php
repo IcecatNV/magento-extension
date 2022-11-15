@@ -8,7 +8,6 @@ use Magento\Framework\Model\AbstractModel;
 
 class QueueScheduler extends AbstractModel implements IdentityInterface
 {
-
     protected const CACHE_TAG = 'icecat_queue_scheduler';
 
     protected $_cacheTag = 'icecat_queue_scheduler';

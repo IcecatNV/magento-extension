@@ -8,19 +8,18 @@ use Magento\Catalog\Model\CategoryRepository;
 use Magento\Catalog\Model\Product;
 use Magento\Eav\Model\Config;
 use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
+use Magento\Eav\Model\ResourceModel\Entity\Attribute;
 use Magento\Eav\Setup\EavSetup;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
+use Magento\Framework\Registry;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Magento\Eav\Model\ResourceModel\Entity\Attribute;
 use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Framework\Registry;
 
 class CreateProductAttribute implements DataPatchInterface, PatchRevertableInterface
 {
-
     /**
      * ModuleDataSetupInterface
      *
@@ -223,7 +222,7 @@ class CreateProductAttribute implements DataPatchInterface, PatchRevertableInter
         $category = $connection->getConnection()
             ->query('SELECT value FROM ' . $table . ' WHERE path = "datafeed/icecat/root_category_id"')
             ->fetch(); */
-        $categoryId = $this->_scopeConfig->getValue('datafeed/icecat/root_category_id',\Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        $categoryId = $this->_scopeConfig->getValue('datafeed/icecat/root_category_id', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
         if (!empty($categoryId)) {
             //$categoryId = $category['value'];
             $category = $this->categoryRepository->get($categoryId);

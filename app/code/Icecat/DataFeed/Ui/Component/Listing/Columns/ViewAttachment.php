@@ -43,7 +43,7 @@ class ViewAttachment extends Column
                 if (isset($item['attachment_file'])) {
                     $item[$name] = [
                         'edit' => [
-                            'href' => $this->storeManager->getStore()->getBaseurl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA).$item['attachment_file'],
+                            'href' => $this->storeManager->getStore()->getBaseurl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . $item['attachment_file'],
                             'label' => __($item['attachment_file']),
                             'target' => '_blank',
                             'hidden' => false,
