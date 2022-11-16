@@ -36,6 +36,7 @@ class IceCatUpdateProduct
     protected $_productReviewCollection;
     private File $file;
     private $moduleDataSetup;
+    public $globalImageArray;
 
     /**
      * @param ProductResourceModel $productResource

@@ -15,7 +15,6 @@ class Statistics extends Field
 {
     private Queue $queue;
     private Filesystem $filesystem;
-
     /**
      * @param Context $context
      * @param Queue $queue
@@ -60,9 +59,12 @@ class Statistics extends Field
 
     public function collectData()
     {
+        $forbidden_count='';
         $data                   = [];
         $data['missing_gtin']   = '';
         $data['not_found']      = '';
+        $data['countof_four']      = '';
+        $data['product_code'] = '';
         $schedulerDetails       = $this->queue->getSchedulerId();
         if (empty($schedulerDetails)) {
             return $data;
@@ -76,6 +78,8 @@ class Statistics extends Field
         $importedRecord         = 0;
         $unsuccessfulRecord     = 0;
         $contents               = null;
+        $count=0;
+
         foreach ($import_info as $key => $value) {
             if ($key == 0) {
                 $data['started']    = $value['started'];
@@ -101,7 +105,10 @@ class Statistics extends Field
         $data['success_record'] = $importedRecord;
         $data['error_record']   = $unsuccessfulRecord;
         $data['log']            = $contents;
-
+        $forbidden_count = $this->cleanMessage($data);
+        $data['countof_four']  = $forbidden_count;
+        $notfound_icecat = $this->notfoundinIcecat($data);
+        $data['not_found'] = $notfound_icecat;
         $contents           = $this->createLogFile($data);
         $logFileName        = 'icecat_last_import.csv';
         $fileUrl            = $this->getCSV($contents, $logFileName);
@@ -134,6 +141,39 @@ class Statistics extends Field
         }
         return $csvContent;
     }
+    private function cleanMessage($data)
+    {
+        $msgContent = [];
+        $i=0;
+        if (!empty($data['log'])) {
+            $contents = json_decode($data['log']);
+            foreach ($contents as $key => $logMessage) {
+                $msgContent[] =$logMessage;
+                if($logMessage->message == "Display of content for users with a Full Icecat subscription level will require the use of a server certificate and a dynamic secret phrase. Please, contact your account manager for help with the implementation.")
+                {
+                    $i++;
+                }
+            } 
+        }
+        return $i;
+    }
+
+    private function notfoundinIcecat($data)
+    {
+        $i=0;
+        $msgContent = [];
+        if (!empty($data['log'])) {
+            $contents = json_decode($data['log']);
+            foreach ($contents as $key => $logMessage) {
+                $msgContent[] =$logMessage;
+                if($logMessage->message == "The requested product is not present in the Icecat database" || $logMessage->message =="The GTIN can not be found" || $logMessage->message == "Product has brand restrictions or access is limited")
+                {
+                    $i++;
+                }
+            } 
+        }
+        return $i;
+    }
 
     public function getTimezone()
     {
@@ -153,9 +193,9 @@ class Statistics extends Field
             $itemData   = [];
             $itemData[] = $item->product_id;
             $itemData[] = $item->message;
-            $itemData[] = $item->gtin;
-            $itemData[] = $item->brand;
-            $itemData[] = $item->product_code;
+            //$itemData[] = $item->gtin;
+            //$itemData[] = $item->brand;
+            //$itemData[] = $item->product_code;
             $stream->writeCsv($itemData);
         }
         $fileUrl    = DIRECTORY_SEPARATOR . DirectoryList::MEDIA . DIRECTORY_SEPARATOR . 'icecatLogs' . DIRECTORY_SEPARATOR . $logFileName;

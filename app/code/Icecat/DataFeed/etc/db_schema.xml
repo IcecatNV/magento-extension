@@ -49,6 +49,7 @@
         <column xsi:type="int" name="retries" unsigned="true" nullable="false" default="0" identity="false" comment="Retries"/>
         <column xsi:type="text" name="error_log" nullable="true" comment="Error Log"/>
         <column xsi:type="int" name="data_size" unsigned="true" nullable="true" identity="false" comment="Data Size"/>
+        <column xsi:type="text" name="schedule_unique_id" nullable="true" comment="Schedule Unique Id"/>
         <column xsi:type="datetime" name="created" on_update="true" nullable="true" comment="Date and time of job creation"/>
         <column xsi:type="datetime" name="locked_at" on_update="false" nullable="true" comment="Indicates time where PID was assigned to the job"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
@@ -58,7 +59,7 @@
     <table name="icecat_datafeed_queue_log" resource="default" engine="innodb" comment="icecat data feed  Queue Log Table">
         <column xsi:type="int" name="id" unsigned="false" nullable="false" identity="true" comment="log Id"/>
         <column xsi:type="int" name="job_id" unsigned="true" nullable="true" identity="false" comment="Job Id"/>
-        <column xsi:type="int" name="schedule_unique_id" nullable="true" comment="Schedule Unique Id"/>
+        <column xsi:type="text" name="schedule_unique_id" nullable="true" comment="Schedule Unique Id"/>
         <column xsi:type="datetime" name="started" on_update="false" nullable="true" comment="Queue Started Date Time"/>
         <column xsi:type="datetime" name="ended" on_update="false" nullable="true" comment="Queue End Date Time"/>
         <column xsi:type="int" name="duration" unsigned="true" padding="20" nullable="true" identity="false" comment="Duration"/>
@@ -77,6 +78,7 @@
         <column xsi:type="text" name="data" nullable="false" comment="Data"/>
         <column xsi:type="text" name="error_log" nullable="false" comment="Error Log"/>
         <column xsi:type="int" name="data_size" unsigned="true" nullable="true" identity="false" comment="Data Size"/>
+        <column xsi:type="text" name="schedule_unique_id" nullable="true" comment="Schedule Unique Id"/>
         <column xsi:type="datetime" name="created_at" on_update="true" nullable="true" comment="Date and time of job creation"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>
@@ -93,7 +95,7 @@
         <column xsi:type="text" name="queue_mode" nullable="false" comment="Queue Mode"/>
         <column xsi:type="text" name="cron_expression" nullable="true" comment="Cron Expression"/>
         <column xsi:type="datetime" name="cron_run_time" nullable="true" comment="Cron Run Time"/>
-        <column xsi:type="int" name="schedule_unique_id" nullable="true" comment="Schedule Unique Id"/>
+        <column xsi:type="text" name="schedule_unique_id" nullable="true" comment="Schedule Unique Id"/>
         <column xsi:type="datetime" name="created_at" on_update="true" nullable="true" comment="Date and time of scheduler creation"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>

@@ -2,6 +2,7 @@
 $import_info    = $block->collectData();
 $timezone       = $block->getTimezone();
 $configTimezone = new DateTimeZone($timezone);
+
 ?>
 
 <div class="entry-edit-head admin__collapsible-block">
@@ -42,12 +43,12 @@ $configTimezone = new DateTimeZone($timezone);
                 <td><strong><?php print "Total records found in Magento"; ?>:</strong></td>
                 <td>
                     <?php
-                        if (!empty($import_info['total_record'])) {
-                            echo $import_info['total_record'];
-                        } else {
-                            echo '0';
-                        }
-                        ?>
+if (!empty($import_info['total_record'])) {
+    echo $import_info['total_record'];
+} else {
+    echo '0';
+}
+?>
                 </td>
             </tr>
             <tr>
@@ -67,13 +68,27 @@ if (!empty($import_info['success_record'])) {
                 <td>
                     <?php
 if (!empty($import_info['not_found'])) {
-    echo count(explode(',', $import_info['not_found']));
+    //echo count(explode(',', $import_info['not_found']));
+    echo $import_info['not_found'];
 } else {
     echo '0';
 }
 ?>
                 </td>
             </tr>
+            <tr>
+                <td><strong><?php print "Forbidden in Icecat"; ?>:</strong></td>
+                <td>
+                    <?php
+if (!empty($import_info['countof_four'])) {
+    echo $import_info['countof_four'];
+} else {
+    echo '0';
+}
+?>
+                </td>
+            </tr>
+
             <tr>
                 <td><strong><?php print "Missing Icecat attribute values"; ?>:</strong></td>
                 <td>
