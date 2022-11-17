@@ -82,7 +82,6 @@ class Queue
 
     private $columnExists;
 
-
     /**
      * @param CollectionFactory $collectionFactory
      * @param ResourceConnection $resourceConnection
@@ -225,8 +224,8 @@ class Queue
     private function getNewProductsCollections($cronLastUpdated)
     {
         $collection = $this->collectionFactory
-            ->create(); 
-        $collection->addAttributeToFilter('updated_at', array('gteq' => $cronLastUpdated));
+            ->create();
+        $collection->addAttributeToFilter('updated_at', ['gteq' => $cronLastUpdated]);
         return $collection;
     }
 
@@ -257,7 +256,7 @@ class Queue
                     $storeArrayForImage = explode(',', $icecatStores);
                     //$storeArray[] = 0; // Admin store
                     $storeArrayForImage[] = 0; // Admin store
-                    $updatedStore = array();
+                    $updatedStore = [];
                     $errorMessage = null;
                     $globalImageArray = [];
                     $globalVideoArray = [];
@@ -266,7 +265,7 @@ class Queue
                         if ($this->data->isImportImagesEnabled()) {
                             $product = $this->productRepository->getById($productId, false, $store);
                             $images = $product->getMediaGalleryImages();
-                            $mediaTypeArray = array('image', 'small_image', 'thumbnail');
+                            $mediaTypeArray = ['image', 'small_image', 'thumbnail'];
                             $this->processor->clearMediaAttribute($product, $mediaTypeArray);
                             $existingMediaGalleryEntries = $product->getMediaGalleryEntries();
                             foreach ($existingMediaGalleryEntries as $key => $entry) {
@@ -279,30 +278,29 @@ class Queue
                             $this->productRepository->save($product);
                         }
                     }
-                    
+
                     // Check for icecat root category from all root categories, create it if not there
-                    $rootCats = array();
+                    $rootCats = [];
                     if ($this->data->isCategoryImportEnabled()) {
                         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
                         $collection = $objectManager->get('\Magento\Catalog\Model\ResourceModel\Category\CollectionFactory')->create();
-                        $collection->addAttributeToFilter('level', array('eq' => 1));
+                        $collection->addAttributeToFilter('level', ['eq' => 1]);
                         foreach ($collection as $coll) {
-                            $rootCatId = $coll->getId();                    
-                           $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
-                           $rootCatData = $rootCat->load($rootCatId);
-                           $rootCats[] = strtolower($rootCatData->getName());
-                       }
-                       $myRoot=strtolower('Icecat Categories');
-                       if(!in_array($myRoot,$rootCats))
-                       {
-                           $store = $this->storeManager->getStore();
-                           $storeId = $store->getStoreId();
-                           $rootNodeId = 1;
-                           $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
-                           $cat_info = $rootCat->load($rootNodeId);
-                           $myRoot='Icecat Categories';
-                           $name=ucfirst($myRoot);
-                           $url=strtolower($myRoot);
+                            $rootCatId = $coll->getId();
+                            $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
+                            $rootCatData = $rootCat->load($rootCatId);
+                            $rootCats[] = strtolower($rootCatData->getName());
+                        }
+                        $myRoot=strtolower('Icecat Categories');
+                        if (!in_array($myRoot, $rootCats)) {
+                            $store = $this->storeManager->getStore();
+                            $storeId = $store->getStoreId();
+                            $rootNodeId = 1;
+                            $rootCat = $objectManager->get('Magento\Catalog\Model\Category');
+                            $cat_info = $rootCat->load($rootNodeId);
+                            $myRoot='Icecat Categories';
+                            $name=ucfirst($myRoot);
+                            $url=strtolower($myRoot);
                             $cleanurl = trim(preg_replace('/ +/', '', preg_replace('/[^A-Za-z0-9 ]/', '', urldecode(html_entity_decode(strip_tags($url))))));
                             $categoryFactory=$objectManager->get('\Magento\Catalog\Model\CategoryFactory');
                             $categoryTmp = $categoryFactory->create();
@@ -317,30 +315,30 @@ class Queue
                             $savedCategory = $categoryTmp->save();
                             $icecatCid = $savedCategory->getId();
                             $this->config->saveConfig('datafeed/icecat/root_category_id', $icecatCid, 'default', 0);
-                        }else{
+                        } else {
                             $categoryFactory = $objectManager->get('\Magento\Catalog\Model\CategoryFactory');
-                            $collection = $categoryFactory->create()->getCollection()->addAttributeToFilter('name',"Icecat Categories")->setPageSize(1);
+                            $collection = $categoryFactory->create()->getCollection()->addAttributeToFilter('name', "Icecat Categories")->setPageSize(1);
                             $icecatCid = $collection->getFirstItem()->getId();
                         }
 
                         $allstores = $this->storeRepository->getList();
                         foreach ($allstores as $eachstore) {
                             if ($eachstore->getCode() == 'admin') {
-                               continue;
-                           }
-                           $allstoreArr[] = $eachstore->getId();                
-                       }
-                       foreach ($allstoreArr as $eachstore) {
-                           $storeData = $this->storeRepository->getById($eachstore);
-                           $storeManager = $objectManager->get(StoreManagerInterface::class);
-                           $storeGroup = $objectManager->get(GroupInterfaceFactory::class)->create()->load($storeData->getData('group_id'));
-                           if(in_array($eachstore, $storeArray)){
-                               $storeGroup->setRootCategoryId($icecatCid);
-                            }else{
+                                continue;
+                            }
+                            $allstoreArr[] = $eachstore->getId();
+                        }
+                        foreach ($allstoreArr as $eachstore) {
+                            $storeData = $this->storeRepository->getById($eachstore);
+                            $storeManager = $objectManager->get(StoreManagerInterface::class);
+                            $storeGroup = $objectManager->get(GroupInterfaceFactory::class)->create()->load($storeData->getData('group_id'));
+                            if (in_array($eachstore, $storeArray)) {
+                                $storeGroup->setRootCategoryId($icecatCid);
+                            } else {
                                 $storeGroup->setRootCategoryId(2);
                             }
-                            $objectManager->get(GroupResource::class)->save($storeGroup); 
-                        }               
+                            $objectManager->get(GroupResource::class)->save($storeGroup);
+                        }
                     }
 
                     foreach ($storeArray as $store) {
@@ -353,7 +351,7 @@ class Queue
                             if (!empty($response) && !empty($response['Code'])) {
                                 $errorMessage       = $this->errorMessageResponse($response, $product);
                                 $errorProductIds[]  = $productId;
-                                $errorLog['Product ID-'.$productId] = $errorMessage;
+                                $errorLog['Product ID-' . $productId] = $errorMessage;
                             } else {
                                 $globalImageArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalImageArray);
                                 $successProducts[] = $productId;
@@ -377,9 +375,9 @@ class Queue
                     }
 
                     if ($this->columnExists === false) {
-                        $query = "select * from " . $this->galleryEntitytable. " A left join ". $this->galleryTable. " B on B.value_id = A.value_id where A.row_id=".$productId. " and B.media_type='image'";
+                        $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id where A.row_id=" . $productId . " and B.media_type='image'";
                     } else {
-                        $query = "select * from " . $this->galleryEntitytable. " A left join ". $this->galleryTable. " B on B.value_id = A.value_id where A.entity_id=".$productId. " and B.media_type='image'";
+                        $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id where A.entity_id=" . $productId . " and B.media_type='image'";
                     }
                     $data = $this->db->query($query)->fetchAll();
                     foreach ($globalImageArray as $key => $imageArray) {
@@ -389,7 +387,7 @@ class Queue
                             foreach ($data as $k => $value) {
                                 if ($key != $value['store_id']) {
                                     if (strpos($value['value'], $imageName) !== false) {
-                                        $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=".$value['store_id'];
+                                        $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=" . $value['store_id'];
                                         $this->db->query($updateQuery);
                                     }
                                 }
@@ -399,13 +397,13 @@ class Queue
 
                     if (!empty($globalVideoArray)) {
                         if ($this->columnExists === false) {
-                            $query = "select * from " . $this->galleryEntitytable. " A left join ". $this->galleryTable. " B on B.value_id = A.value_id
-                    left join ". $this->videoTable. "  C on C.value_id = A.value_id
-                     where A.row_id=".$productId. " and B.media_type='external-video'";
+                            $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id
+                    left join " . $this->videoTable . "  C on C.value_id = A.value_id
+                     where A.row_id=" . $productId . " and B.media_type='external-video'";
                         } else {
-                            $query = "select * from " . $this->galleryEntitytable. " A left join ". $this->galleryTable. " B on B.value_id = A.value_id
-                    left join ". $this->videoTable. "  C on C.value_id = A.value_id
-                     where A.entity_id=".$productId. " and B.media_type='external-video'";
+                            $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id
+                    left join " . $this->videoTable . "  C on C.value_id = A.value_id
+                     where A.entity_id=" . $productId . " and B.media_type='external-video'";
                         }
                         $videoData = $this->db->query($query)->fetchAll();
                         foreach ($globalVideoArray as $key => $videoArray) {
@@ -414,7 +412,7 @@ class Queue
                                 foreach ($videoData as $k => $value) {
                                     if ($key == 0) {
                                         if ($value['url'] == $videoUrl) {
-                                            $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=".$value['store_id'];
+                                            $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=" . $value['store_id'];
                                             $this->db->query($updateQuery);
                                         }
                                     }
@@ -479,18 +477,6 @@ class Queue
                     //'product_code'      => $product->getData()[$productCodeAttribute]
                 ];
                 break;
-            /*== case '403':
-                    $brandNameAttribute     = $this->data->getBrandCode();
-                    $productCodeAttribute   = $this->data->getProductCode();
-                    $gtinAttribute          = $this->data->getGTINCode();
-                    $message                = 'Forbidden in Icecat';
-                    return[
-                        'message'           => $message,
-                        'gtin'              => $product->getData()[$gtinAttribute],
-                        'brand'             => $product->getData()[$brandNameAttribute]
-                        //'product_code'      => $product->getData()[$productCodeAttribute]
-                    ];
-                    break; */
             default:
                 return[
                     'message'           => $response['Message'],

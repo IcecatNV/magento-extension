@@ -7,11 +7,11 @@ use Icecat\DataFeed\Helper\Data;
 use Icecat\DataFeed\Model\Queue;
 use Icecat\DataFeed\Model\Scheduler;
 use Magento\Framework\App\State;
+use Magento\Framework\Event\Observer\Cron;
+use Magento\Framework\Message\ManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Magento\Framework\Message\ManagerInterface;
-use Magento\Framework\Event\Observer\Cron;
 
 class QueueRunner extends Command
 {
@@ -30,7 +30,6 @@ class QueueRunner extends Command
     /** @var Scheduler  */
     private $scheduler;
     private $cron;
-
 
     protected function configure(): void
     {
@@ -101,7 +100,7 @@ class QueueRunner extends Command
 
         $scheduledJobs = $this->scheduler->fetchNotCompletedScheduleRecord();
         if (empty($scheduledJobs)) {
-             return $exitCode;
+            return $exitCode;
         }
 
         $cronArray = [];
