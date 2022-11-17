@@ -340,7 +340,6 @@ class Queue
                             $objectManager->get(GroupResource::class)->save($storeGroup);
                         }
                     }
-
                     foreach ($storeArray as $store) {
                         $product = $this->productRepository->getById($productId, false, $store);
                         $language = $this->data->getStoreLanguage($store);
@@ -455,34 +454,62 @@ class Queue
 
     private function errorMessageResponse($response, $product)
     {
+        $brandname = '';
+        $productcode = '';
+        $gtin = '';
+        $gtincode=$this->data->getGTINCode();
+        $brandcode=$this->data->getBrandCode();
+        $product_att_code=$this->data->getProductCode(); 
+        if(!empty($product->getData($gtincode)))
+        {
+            $productcode=$product->getData($gtincode);
+        }
+        
+        if(!empty($product->getData($brandcode)))
+        {
+            $brandname=$product->getData($brandcode);
+        }
+        
+        if(!empty($product->getData($product_att_code)))
+        {
+            $gtin=$product->getData($product_att_code);
+        }
         switch ($response['Code']) {
             case '400':
-                $gtinAttribute          = $this->data->getGTINCode();
+                
                 $message                = 'The GTIN can not be found';
                 return[
                     'message'           => $message,
-                    'gtin'              => $product->getData()[$gtinAttribute],
-                    'brand'             => null,
-                    'product_code'      => null
+                    'gtin'              => $gtin,
+                    'brand'             => $brandname,
+                    'product_code'      => $productcode
                 ];
                 break;
             case '404':
-                $brandNameAttribute     = $this->data->getBrandCode();
-                $productCodeAttribute   = $this->data->getProductCode();
+                
                 $message                = 'The requested product is not present in the Icecat database';
                 return[
                     'message'           => $message,
-                    'gtin'              => null
-                    //'brand'             => $product->getData()[$brandNameAttribute],
-                    //'product_code'      => $product->getData()[$productCodeAttribute]
+                    'gtin'              => $gtin,
+                    'brand'             => $brandname,
+                    'product_code'      => $productcode 
                 ];
                 break;
+                case '403':
+                    $message                = 'Display of content for users with a Full Icecat subscription level will require the use of a server certificate and a dynamic secret phrase. Please, contact your account manager for help with the implementation.';
+                    return[
+                        'message'           => $message,
+                        'gtin'              => $gtin,
+                        'brand'             => $brandname,
+                        'product_code'      => $productcode
+                    ];
+                    break;
             default:
                 return[
                     'message'           => $response['Message'],
-                    'gtin'              => null,
-                    'brand'             => null,
-                    'product_code'      => null
+                    'gtin'              => $gtin,
+                    'brand'             => $brandname,
+                    'product_code'      => $productcode
                 ];
                 break;
         }

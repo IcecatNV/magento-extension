@@ -15,6 +15,7 @@ class Statistics extends Field
 {
     private Queue $queue;
     private Filesystem $filesystem;
+
     /**
      * @param Context $context
      * @param Queue $queue
@@ -96,7 +97,6 @@ class Statistics extends Field
             if (!empty($value['product_ids_with_missing_gtin_product_code'])) {
                 $data['missing_gtin'] .= $value['product_ids_with_missing_gtin_product_code'] . ",";
             }
-
             if (!empty($value['product_ids'])) {
                 $data['not_found']  .= $value['product_ids'];
             }
@@ -121,10 +121,13 @@ class Statistics extends Field
         $csvContent = [];
         if (!empty($data['log'])) {
             $contents = json_decode($data['log']);
-            foreach ($contents as $key => $logMessage) {
-                $productId = str_replace("Product ID-", "", $key);
-                $logMessage->product_id = $productId;
-                $csvContent[] = $logMessage;
+            if(!empty($contents))
+            {
+                foreach ($contents as $key => $logMessage) {
+                    $productId = str_replace("Product ID-", "", $key);
+                    $logMessage->product_id = $productId;
+                    $csvContent[] = $logMessage;
+                }
             }
         }
 
@@ -147,10 +150,13 @@ class Statistics extends Field
         $i=0;
         if (!empty($data['log'])) {
             $contents = json_decode($data['log']);
-            foreach ($contents as $key => $logMessage) {
-                $msgContent[] =$logMessage;
-                if ($logMessage->message == "Display of content for users with a Full Icecat subscription level will require the use of a server certificate and a dynamic secret phrase. Please, contact your account manager for help with the implementation.") {
-                    $i++;
+            if(!empty($contents))
+            {
+                foreach ($contents as $key => $logMessage) {
+                    $msgContent[] =$logMessage;
+                    if ($logMessage->message == "Display of content for users with a Full Icecat subscription level will require the use of a server certificate and a dynamic secret phrase. Please, contact your account manager for help with the implementation.") {
+                        $i++;
+                    }
                 }
             }
         }
@@ -163,10 +169,13 @@ class Statistics extends Field
         $msgContent = [];
         if (!empty($data['log'])) {
             $contents = json_decode($data['log']);
-            foreach ($contents as $key => $logMessage) {
-                $msgContent[] =$logMessage;
-                if ($logMessage->message == "The requested product is not present in the Icecat database" || $logMessage->message =="The GTIN can not be found" || $logMessage->message == "Product has brand restrictions or access is limited") {
-                    $i++;
+            if(!empty($contents))
+            {
+                foreach ($contents as $key => $logMessage) {
+                    $msgContent[] =$logMessage;
+                    if ($logMessage->message == "The requested product is not present in the Icecat database" || $logMessage->message =="The GTIN can not be found" || $logMessage->message == "Product has brand restrictions or access is limited") {
+                        $i++;
+                    }
                 }
             }
         }
@@ -191,9 +200,9 @@ class Statistics extends Field
             $itemData   = [];
             $itemData[] = $item->product_id;
             $itemData[] = $item->message;
-            //$itemData[] = $item->gtin;
-            //$itemData[] = $item->brand;
-            //$itemData[] = $item->product_code;
+            $itemData[] = $item->gtin;
+            $itemData[] = $item->brand;
+            $itemData[] = $item->product_code;
             $stream->writeCsv($itemData);
         }
         $fileUrl    = DIRECTORY_SEPARATOR . DirectoryList::MEDIA . DIRECTORY_SEPARATOR . 'icecatLogs' . DIRECTORY_SEPARATOR . $logFileName;
