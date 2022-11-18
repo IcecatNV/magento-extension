@@ -6,8 +6,6 @@ namespace Icecat\DataFeed\Controller\Adminhtml\Data;
 use Icecat\DataFeed\Model\Scheduler;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
-use Icecat\DataFeed\Model\Queue;
-
 
 class Importnewproductinfo extends Action
 {

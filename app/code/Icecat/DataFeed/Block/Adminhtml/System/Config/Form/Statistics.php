@@ -121,8 +121,7 @@ class Statistics extends Field
         $csvContent = [];
         if (!empty($data['log'])) {
             $contents = json_decode($data['log']);
-            if(!empty($contents))
-            {
+            if (!empty($contents)) {
                 foreach ($contents as $key => $logMessage) {
                     $productId = str_replace("Product ID-", "", $key);
                     $logMessage->product_id = $productId;
@@ -150,8 +149,7 @@ class Statistics extends Field
         $i=0;
         if (!empty($data['log'])) {
             $contents = json_decode($data['log']);
-            if(!empty($contents))
-            {
+            if (!empty($contents)) {
                 foreach ($contents as $key => $logMessage) {
                     $msgContent[] =$logMessage;
                     if ($logMessage->message == "Display of content for users with a Full Icecat subscription level will require the use of a server certificate and a dynamic secret phrase. Please, contact your account manager for help with the implementation.") {
@@ -169,8 +167,7 @@ class Statistics extends Field
         $msgContent = [];
         if (!empty($data['log'])) {
             $contents = json_decode($data['log']);
-            if(!empty($contents))
-            {
+            if (!empty($contents)) {
                 foreach ($contents as $key => $logMessage) {
                     $msgContent[] =$logMessage;
                     if ($logMessage->message == "The requested product is not present in the Icecat database" || $logMessage->message =="The GTIN can not be found" || $logMessage->message == "Product has brand restrictions or access is limited") {

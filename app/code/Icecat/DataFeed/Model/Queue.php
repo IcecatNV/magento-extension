@@ -459,24 +459,20 @@ class Queue
         $gtin = '';
         $gtincode=$this->data->getGTINCode();
         $brandcode=$this->data->getBrandCode();
-        $product_att_code=$this->data->getProductCode(); 
-        if(!empty($product->getData($gtincode)))
-        {
+        $product_att_code=$this->data->getProductCode();
+        if (!empty($product->getData($gtincode))) {
             $productcode=$product->getData($gtincode);
         }
-        
-        if(!empty($product->getData($brandcode)))
-        {
+
+        if (!empty($product->getData($brandcode))) {
             $brandname=$product->getData($brandcode);
         }
-        
-        if(!empty($product->getData($product_att_code)))
-        {
+
+        if (!empty($product->getData($product_att_code))) {
             $gtin=$product->getData($product_att_code);
         }
         switch ($response['Code']) {
             case '400':
-                
                 $message                = 'The GTIN can not be found';
                 return[
                     'message'           => $message,
@@ -486,24 +482,23 @@ class Queue
                 ];
                 break;
             case '404':
-                
                 $message                = 'The requested product is not present in the Icecat database';
                 return[
                     'message'           => $message,
                     'gtin'              => $gtin,
                     'brand'             => $brandname,
-                    'product_code'      => $productcode 
+                    'product_code'      => $productcode
                 ];
                 break;
-                case '403':
-                    $message                = 'Display of content for users with a Full Icecat subscription level will require the use of a server certificate and a dynamic secret phrase. Please, contact your account manager for help with the implementation.';
-                    return[
+            case '403':
+                $message                = 'Display of content for users with a Full Icecat subscription level will require the use of a server certificate and a dynamic secret phrase. Please, contact your account manager for help with the implementation.';
+                return[
                         'message'           => $message,
                         'gtin'              => $gtin,
                         'brand'             => $brandname,
                         'product_code'      => $productcode
                     ];
-                    break;
+                break;
             default:
                 return[
                     'message'           => $response['Message'],

@@ -19,7 +19,6 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Icecat\DataFeed\Model\AttributeCodes;
 
-
 class IceCatUpdateProduct
 {
     private ProductResourceModel $productResource;
