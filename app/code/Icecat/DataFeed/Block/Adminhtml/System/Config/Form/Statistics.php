@@ -81,7 +81,6 @@ class Statistics extends Field
         $contents               = null;
         $count=0;
         $contents           .='[';
-        $lastkey = array_key_last($import_info);
         foreach ($import_info as $key => $value) {
             if ($key == 0) {
                 $data['started']    = $value['started'];
@@ -209,9 +208,9 @@ class Statistics extends Field
             $itemData   = [];
             $itemData[] = $item->product_id;
             $itemData[] = $item->message;
-            $itemData[] = $item->gtin;
-            $itemData[] = $item->brand;
             $itemData[] = $item->product_code;
+            $itemData[] = $item->brand;
+            $itemData[] = $item->gtin;
             $stream->writeCsv($itemData);
         }
         $fileUrl    = DIRECTORY_SEPARATOR . DirectoryList::MEDIA . DIRECTORY_SEPARATOR . 'icecatLogs' . DIRECTORY_SEPARATOR . $logFileName;
