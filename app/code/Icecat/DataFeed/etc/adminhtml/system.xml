@@ -98,6 +98,7 @@
                     </field>
                     <field id="import_pdf" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="0">
                         <label>Import PDF</label>
+                        <comment>Table :: icecat_product_attachment</comment>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                 </group>
@@ -126,6 +127,7 @@
                     </field>
                     <field id="import_product_reviews" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                         <label>Import Product Reviews</label>
+                        <comment>Table :: icecat_product_review</comment>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                     <field id="import_product_stories" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
