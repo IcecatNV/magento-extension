@@ -221,6 +221,10 @@ class IceCatUpdateProduct
                     $newFileName = $tmpDir . $imageName;
                     /** read file from URL and copy it to the new destination */
                     $result = $this->file->read($image, $newFileName);
+
+                    // Updating file permission of the uploaded file
+                    $this->file->chmod($newFileName, 0777);
+                    
                     if ($result) {
                         if ($i == 0) {
                             $product->addImageToMediaGallery($newFileName, ['image', 'small_image', 'thumbnail'], false, false);
