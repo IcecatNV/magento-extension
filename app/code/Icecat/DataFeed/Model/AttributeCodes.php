@@ -22,11 +22,11 @@ class AttributeCodes
     public const ICECAT_PRODUCT_ATTRIBUTE_LONG_PRODUCT_NAME_TITLE = 'Icecat Long Product Name';
 
     // Text Editor Attribute
-    public const ICECAT_PRODUCT_ATTRIBUTE_SPECIFICATION = 'icecat_specification';
+    public const ICECAT_PRODUCT_ATTRIBUTE_SPECIFICATION = 'icecat_specifications';
     public const ICECAT_PRODUCT_ATTRIBUTE_SPECIFICATION_TITLE = 'Icecat Specifications';
     public const ICECAT_PRODUCT_ATTRIBUTE_PRODUCT_STORIES = 'icecat_product_stories';
     public const ICECAT_PRODUCT_ATTRIBUTE_PRODUCT_STORIES_TITLE = 'Icecat Product Stories';
-    public const ICECAT_PRODUCT_ATTRIBUTE_REASON_TO_BUY = 'icecat_reason_to_buy';
+    public const ICECAT_PRODUCT_ATTRIBUTE_REASON_TO_BUY = 'icecat_reasons_to_buy';
     public const ICECAT_PRODUCT_ATTRIBUTE_REASON_TO_BUY_TITLE = 'Icecat Reasons To Buy';
     public const ICECAT_PRODUCT_ATTRIBUTE_BULLET_POINTS = 'icecat_bullet_points';
     public const ICECAT_PRODUCT_ATTRIBUTE_BULLET_POINTS_TITLE = 'Icecat Bullet Points';
