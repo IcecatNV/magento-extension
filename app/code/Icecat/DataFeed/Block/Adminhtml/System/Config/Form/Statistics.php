@@ -80,7 +80,8 @@ class Statistics extends Field
         $unsuccessfulRecord     = 0;
         $contents               = null;
         $count=0;
-
+        $contents           .='[';
+        $lastkey = array_key_last($import_info);
         foreach ($import_info as $key => $value) {
             if ($key == 0) {
                 $data['started']    = $value['started'];
@@ -93,6 +94,7 @@ class Statistics extends Field
             $unsuccessfulRecord += $value['unsuccessful_record'];
             if ($value['error_log'] != "[]") {
                 $contents           .= $value['error_log'];
+                    $contents .= ",";
             }
             if (!empty($value['product_ids_with_missing_gtin_product_code'])) {
                 $data['missing_gtin'] .= $value['product_ids_with_missing_gtin_product_code'] . ",";
@@ -101,15 +103,16 @@ class Statistics extends Field
                 $data['not_found']  .= $value['product_ids'];
             }
         }
+        $contents           .='{"Product ID-":{"message":"","gtin":"","brand":"","product_code":""}}]';
         $data['total_record']   = $totalRecord;
         $data['success_record'] = $importedRecord;
         $data['error_record']   = $unsuccessfulRecord;
         $data['log']            = $contents;
+        $contents           = $this->createLogFile($data);
         $forbidden_count = $this->cleanMessage($data);
         $data['countof_four']  = $forbidden_count;
         $notfound_icecat = $this->notfoundinIcecat($data);
         $data['not_found'] = $notfound_icecat;
-        $contents           = $this->createLogFile($data);
         $logFileName        = 'icecat_last_import.csv';
         $fileUrl            = $this->getCSV($contents, $logFileName);
         $data['log_url']    = $fileUrl;
@@ -122,10 +125,13 @@ class Statistics extends Field
         if (!empty($data['log'])) {
             $contents = json_decode($data['log']);
             if (!empty($contents)) {
-                foreach ($contents as $key => $logMessage) {
-                    $productId = str_replace("Product ID-", "", $key);
-                    $logMessage->product_id = $productId;
-                    $csvContent[] = $logMessage;
+                $arkey=count($contents);
+                for ($j=0;$j<$arkey;$j++) {
+                    foreach ($contents[$j] as $key => $logMessage) {
+                        $productId = str_replace("Product ID-", "", $key);
+                        $logMessage->product_id = $productId;
+                        $csvContent[] = $logMessage;
+                    }
                 }
             }
         }
@@ -148,12 +154,14 @@ class Statistics extends Field
         $msgContent = [];
         $i=0;
         if (!empty($data['log'])) {
-            $contents = json_decode($data['log']);
-            if (!empty($contents)) {
-                foreach ($contents as $key => $logMessage) {
-                    $msgContent[] =$logMessage;
-                    if ($logMessage->message == "Display of content for users with a Full Icecat subscription level will require the use of a server certificate and a dynamic secret phrase. Please, contact your account manager for help with the implementation.") {
-                        $i++;
+            $contents1 = json_decode($data['log']);
+            if (!empty($contents1)) {
+                $arkey=count($contents1);
+                for ($j=0;$j<$arkey;$j++) {
+                    foreach ($contents1[$j] as $logMessage) {
+                        if ($logMessage->message == "Display of content for users with a Full Icecat subscription level will require the use of a server certificate and a dynamic secret phrase. Please, contact your account manager for help with the implementation.") {
+                            $i++;
+                        }
                     }
                 }
             }
@@ -166,12 +174,16 @@ class Statistics extends Field
         $i=0;
         $msgContent = [];
         if (!empty($data['log'])) {
-            $contents = json_decode($data['log']);
-            if (!empty($contents)) {
-                foreach ($contents as $key => $logMessage) {
-                    $msgContent[] =$logMessage;
-                    if ($logMessage->message == "The requested product is not present in the Icecat database" || $logMessage->message =="The GTIN can not be found" || $logMessage->message == "Product has brand restrictions or access is limited") {
-                        $i++;
+            $contents2 = json_decode($data['log']);
+            if (!empty($contents2)) {
+                $arkey=count($contents2);
+                for($j=0;$j<$arkey;$j++)
+                {
+                    foreach ($contents2[$j] as $key => $logMessage) {
+                        $msgContent[] =$logMessage;
+                         if ($logMessage->message == "The requested product is not present in the Icecat database" || $logMessage->message =="The GTIN can not be found" || $logMessage->message == "Product has brand restrictions or access is limited") {
+                            $i++;
+                        } 
                     }
                 }
             }
