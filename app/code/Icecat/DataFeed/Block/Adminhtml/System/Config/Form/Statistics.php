@@ -93,7 +93,7 @@ class Statistics extends Field
             $unsuccessfulRecord += $value['unsuccessful_record'];
             if ($value['error_log'] != "[]") {
                 $contents           .= $value['error_log'];
-                    $contents .= ",";
+                $contents .= ",";
             }
             if (!empty($value['product_ids_with_missing_gtin_product_code'])) {
                 $data['missing_gtin'] .= $value['product_ids_with_missing_gtin_product_code'] . ",";
@@ -125,7 +125,7 @@ class Statistics extends Field
             $contents = json_decode($data['log']);
             if (!empty($contents)) {
                 $arkey=count($contents);
-                for ($j=0;$j<$arkey;$j++) {
+                for ($j=0; $j<$arkey; $j++) {
                     foreach ($contents[$j] as $key => $logMessage) {
                         $productId = str_replace("Product ID-", "", $key);
                         $logMessage->product_id = $productId;
@@ -156,7 +156,7 @@ class Statistics extends Field
             $contents1 = json_decode($data['log']);
             if (!empty($contents1)) {
                 $arkey=count($contents1);
-                for ($j=0;$j<$arkey;$j++) {
+                for ($j=0; $j<$arkey; $j++) {
                     foreach ($contents1[$j] as $logMessage) {
                         if ($logMessage->message == "Display of content for users with a Full Icecat subscription level will require the use of a server certificate and a dynamic secret phrase. Please, contact your account manager for help with the implementation.") {
                             $i++;
@@ -176,13 +176,12 @@ class Statistics extends Field
             $contents2 = json_decode($data['log']);
             if (!empty($contents2)) {
                 $arkey=count($contents2);
-                for($j=0;$j<$arkey;$j++)
-                {
+                for ($j=0; $j<$arkey; $j++) {
                     foreach ($contents2[$j] as $key => $logMessage) {
                         $msgContent[] =$logMessage;
-                         if ($logMessage->message == "The requested product is not present in the Icecat database" || $logMessage->message =="The GTIN can not be found" || $logMessage->message == "Product has brand restrictions or access is limited") {
+                        if ($logMessage->message == "The requested product is not present in the Icecat database" || $logMessage->message =="The GTIN can not be found" || $logMessage->message == "Product has brand restrictions or access is limited") {
                             $i++;
-                        } 
+                        }
                     }
                 }
             }
