@@ -121,9 +121,11 @@ class Processor extends \Magento\Catalog\Model\Product\Gallery\Processor
         if ($mediaAttribute !== null) {
             $product->setMediaAttribute($product, $mediaAttribute, $finalName);
         }
-        $this->createHandler->execute($product);
+        
+        
+        // $this->createHandler->execute($product);
         $product->save();
-        return true;
+        return $finalName;
     }
 
     /**

@@ -193,6 +193,7 @@ class ProductData extends Action
             }
 
             foreach ($storeArray as $store) {
+                
                 $product = $this->productRepository->getById($productId, false, $store);
                 $language = $this->data->getStoreLanguage($store);
                 $icecatUri = $this->data->getIcecatUri($product, $language);
@@ -226,7 +227,9 @@ class ProductData extends Action
                     $imageData = explode('.', $image);
                     $imageName = $imageData[0];
                     foreach ($data as $k => $value) {
+                        
                         if ($key != $value['store_id']) {
+                            
                             if (strpos($value['value'], $imageName) !== false) {
                                 $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=" . $value['store_id'];
                                 $this->db->query($updateQuery);

@@ -88,7 +88,7 @@ class IceCatUpdateProduct
         $this->file = $file;
     }
 
-    public function updateProductWithIceCatResponse(Product $product, $response, $storeId, $globalImageArray)
+    public function updateProductWithIceCatResponse(Product $product, $response, $storeId, $globalMediaArray)
     {
         $tmpMediaDir = $this->getMediaDir();
         if (!file_exists($tmpMediaDir . "/tmp")) {
@@ -241,6 +241,7 @@ class IceCatUpdateProduct
         if ($this->data->isImportMultimediaEnabled()) {
             $productMultiMediaData = $productData['Multimedia'];
             if (count($productMultiMediaData) > 0) {
+                $count = 1;
                 foreach ($productMultiMediaData as $multiMediaData) {
                     if ($multiMediaData['IsVideo']) {
                         if (strpos($multiMediaData['URL'], 'youtube') !== false) {

@@ -153,7 +153,6 @@ class Queue
     public function addJobToQueue($uniqueScheduledId)
     {
         $productCollection = $this->getProductCollections();
-        //$productCollection->getSelect()->reset(\Zend_Db_Select::COLUMNS);
         $productCollection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS);
         $productCollection->getSelect()->columns('entity_id');
         $collection1Ids = $productCollection->getAllIds();
@@ -427,8 +426,9 @@ class Queue
                             }
                         }
                     }
-
+                    
                     if (!empty($globalVideoArray)) {
+                        
                         if ($this->columnExists === false) {
                             $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id
                             left join " . $this->videoTable . "  C on C.value_id = A.value_id
