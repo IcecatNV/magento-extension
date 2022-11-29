@@ -14,6 +14,11 @@ use Magento\Framework\ObjectManagerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Zend_Db_Expr;
 use Zend_Db_Statement_Exception;
+use Magento\Store\Api\StoreRepositoryInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Store\Api\Data\GroupInterfaceFactory;
+use Magento\Store\Model\ResourceModel\Group as GroupResource;
+use Magento\Store\Api\StoreWebsiteRelationInterface;
 
 class Queue
 {
@@ -81,6 +86,15 @@ class Queue
     private $videoTable;
 
     private $columnExists;
+    private $storeRepository;
+    protected $GroupInterfaceFactory;
+    protected $scopeConfig;
+
+     /**
+     * @var StoreWebsiteRelationInterface
+     */
+    private $storeWebsiteRelation;
+
 
     /**
      * @param CollectionFactory $collectionFactory
@@ -94,6 +108,8 @@ class Queue
      * @param Processor $processor
      * @param ResourceConnection $resourceConnection
      * @param ObjectManagerInterface $objectManager
+     * @param StoreRepositoryInterface $StoreRepositoryInterface
+     * @param GroupInterfaceFactory $GroupInterfaceFactory
      */
     public function __construct(
         CollectionFactory $collectionFactory,
@@ -104,7 +120,12 @@ class Queue
         ProductRepository $productRepository,
         IcecatApiService $icecatApiService,
         IceCatUpdateProduct $iceCatUpdateProduct,
-        Processor $processor
+        Processor $processor,
+        StoreRepositoryInterface $storeRepository,
+        \Magento\Customer\Api\Data\GroupInterfaceFactory $GroupInterfaceFactory,
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        StoreWebsiteRelationInterface $storeWebsiteRelation,
+        StoreManagerInterface $storeManager
     ) {
         $this->collectionFactory = $collectionFactory;
         $this->table = $resourceConnection->getTableName('icecat_datafeed_queue');
@@ -118,6 +139,11 @@ class Queue
         $this->icecatApiService = $icecatApiService;
         $this->iceCatUpdateProduct = $iceCatUpdateProduct;
         $this->processor = $processor;
+        $this->GroupInterfaceFactory = $GroupInterfaceFactory;
+        $this->_scopeConfig = $scopeConfig;
+        $this->storeWebsiteRelation = $storeWebsiteRelation;
+        $this->storeRepository = $storeRepository;
+        $this->storeManager = $storeManager;
         $this->galleryEntitytable = $resourceConnection->getTableName('catalog_product_entity_media_gallery_value');
         $this->galleryTable = $resourceConnection->getTableName('catalog_product_entity_media_gallery');
         $this->videoTable = $resourceConnection->getTableName('catalog_product_entity_media_gallery_value_video');
@@ -244,13 +270,25 @@ class Queue
                     'job_id' => $job['job_id'],
                     'started' => date('Y-m-d H:i:s'),
                 ];
+
+                $configurationSelectedStores = explode(",",$this->_scopeConfig->getValue('datafeed/icecat_store_config/stores', \Magento\Store\Model\ScopeInterface::SCOPE_STORE));
+                $configWebsiteId = [];
+                foreach($configurationSelectedStores as $configurationSelectedStore) {
+                    $configWebsiteId[] = (int)$this->storeManager->getStore($configurationSelectedStore)->getWebsiteId();
+                }
+                $confidWebsiteIds = array_unique($configWebsiteId);
                 $productIds = explode(',', $job['data']);
                 $productWithOutGtinAndProductCodeAndBrandCode = [];
-                $errorProductIds = [];
+                $errorProductIds = []; 
                 $successProducts = [];
                 $errorLog  = [];
                 $started = time();
+                
                 foreach ($productIds as $productId) {
+                    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                    $product = $objectManager->create('Magento\Catalog\Model\Product')->load($productId);
+                    $productWebsiteIds = $product->getWebsiteIds();
+                    $storeDifferencess = array_diff($confidWebsiteIds, $productWebsiteIds);
                     $icecatStores = $this->data->getIcecatStoreConfig();
                     $storeArray = explode(',', $icecatStores);
                     $storeArrayForImage = explode(',', $icecatStores);
@@ -328,16 +366,21 @@ class Queue
                             }
                             $allstoreArr[] = $eachstore->getId();
                         }
-                        foreach ($allstoreArr as $eachstore) {
-                            $storeData = $this->storeRepository->getById($eachstore);
-                            $storeManager = $objectManager->get(StoreManagerInterface::class);
-                            $storeGroup = $objectManager->get(GroupInterfaceFactory::class)->create()->load($storeData->getData('group_id'));
-                            if (in_array($eachstore, $storeArray)) {
-                                $storeGroup->setRootCategoryId($icecatCid);
-                            } else {
-                                $storeGroup->setRootCategoryId(2);
+                        if(empty($storeDifferencess)) {
+                            foreach ($configurationSelectedStores as $eachstore) {
+                                $storeData = $this->storeRepository->getById($eachstore);
+                                $storeManager = $objectManager->get(StoreManagerInterface::class);
+                                $storeGroup = $objectManager->get(GroupInterfaceFactory::class)->create()->load($storeData->getData('group_id'));
+                                if (in_array($eachstore, $storeArray)) {
+                                    $storeGroup->setRootCategoryId($icecatCid);
+                                } else {
+                                    $storeGroup->setRootCategoryId(2);
+                                }
+                                $objectManager->create(GroupResource::class)->save($storeGroup);
                             }
-                            $objectManager->get(GroupResource::class)->save($storeGroup);
+                        } else {
+                            $logger = \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class);
+                            $logger->info("ProductID :".$productId." does not exist in the website's: ". json_encode($storeDifferencess));
                         }
                     }
                     foreach ($storeArray as $store) {
@@ -431,10 +474,16 @@ class Queue
 
                 // Delete one by one
                 $this->db->delete($this->table, ['job_id IN (?)' => $job['job_id']]);
+                
 
                 $this->db->insert($this->logTable, $iceCatLogArray);
+                
+                $connection = $objectManager->create(ResourceConnection::class)->getConnection();
+                $query = "DELETE table1 FROM icecat_datafeed_queue_log table1 INNER JOIN icecat_datafeed_queue_log table2 WHERE table1.id < table2.id AND table1.job_id = table2.job_id";
+                $connection->query($query);
                 $this->logRecord['processed_jobs'] += 1;
             } catch (\Exception $e) {
+
                 $logMessage = date('c') . ' ERROR: ' . get_class($e) . ':
                     ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() .
                     "\nStack trace:\n" . $e->getTraceAsString();
@@ -512,15 +561,6 @@ class Queue
 
     private function clearOldFailingJobs()
     {
-        // $retryLimit = 3;
-
-        // if ($retryLimit > 0) {
-        //     $where = $this->db->quoteInto('retries >= ?', $retryLimit);
-        //     $this->archiveFailedJobs($where);
-        //     $this->db->delete($this->table, 'retries > max_retries');
-        //     return;
-        // }
-
         $this->archiveFailedJobs('retries > max_retries');
         $this->db->delete($this->table, 'retries > max_retries');
     }
