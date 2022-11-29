@@ -292,10 +292,10 @@ class Queue
                     $icecatStores = $this->data->getIcecatStoreConfig();
                     $storeArray = explode(',', $icecatStores);
                     $storeArrayForImage = explode(',', $icecatStores);
-                    //$storeArray[] = 0; // Admin store
                     $storeArrayForImage[] = 0; // Admin store
                     $updatedStore = [];
                     $errorMessage = null;
+                    $globalMediaArray =[];
                     $globalImageArray = [];
                     $globalVideoArray = [];
                     $responseArray = [];
@@ -395,24 +395,13 @@ class Queue
                                 $errorProductIds[]  = $productId;
                                 $errorLog['Product ID-' . $productId] = $errorMessage;
                             } else {
-                                $globalImageArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalImageArray);
+                                $globalMediaArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalMediaArray);
+                                $globalImageArray = array_key_exists('image', $globalMediaArray)?$globalMediaArray['image']:[];
+                                $globalVideoArray = array_key_exists('video', $globalMediaArray)?$globalMediaArray['video']:[];
                                 $successProducts[] = $productId;
                             }
                         } else {
                             $productWithOutGtinAndProductCodeAndBrandCode[] = $productId;
-                        }
-                    }
-
-                    // Logic for Video
-                    if (!empty($responseArray)) {
-                        if ($this->data->isImportMultimediaEnabled()) {
-                            foreach ($storeArray as $store) {
-                                $product = $this->productRepository->getById($productId);
-                                if (!empty($response) && !empty($response['Code'])) {
-                                } else {
-                                    $globalVideoArray = $this->iceCatUpdateProduct->importVideo($product, $responseArray[$store], $store, $globalVideoArray);
-                                }
-                            }
                         }
                     }
 
@@ -422,15 +411,17 @@ class Queue
                         $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id where A.entity_id=" . $productId . " and B.media_type='image'";
                     }
                     $data = $this->db->query($query)->fetchAll();
-                    foreach ($globalImageArray as $key => $imageArray) {
-                        foreach ($imageArray as $image) {
-                            $imageData = explode('.', $image);
-                            $imageName = $imageData[0];
-                            foreach ($data as $k => $value) {
-                                if ($key != $value['store_id']) {
-                                    if (strpos($value['value'], $imageName) !== false) {
-                                        $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=" . $value['store_id'];
-                                        $this->db->query($updateQuery);
+                    if(!empty($globalImageArray)) {
+                        foreach ($globalImageArray as $key => $imageArray) {
+                            foreach ($imageArray as $image) {
+                                $imageData = explode('.', $image);
+                                $imageName = $imageData[0];
+                                foreach ($data as $k => $value) {
+                                    if ($key != $value['store_id']) {
+                                        if (strpos($value['value'], $imageName) !== false) {
+                                            $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=" . $value['store_id'];
+                                            $this->db->query($updateQuery);
+                                        }
                                     }
                                 }
                             }
@@ -440,21 +431,21 @@ class Queue
                     if (!empty($globalVideoArray)) {
                         if ($this->columnExists === false) {
                             $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id
-                    left join " . $this->videoTable . "  C on C.value_id = A.value_id
-                     where A.row_id=" . $productId . " and B.media_type='external-video'";
+                            left join " . $this->videoTable . "  C on C.value_id = A.value_id
+                            where A.row_id=" . $productId . " and B.media_type='external-video'";
                         } else {
                             $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id
-                    left join " . $this->videoTable . "  C on C.value_id = A.value_id
-                     where A.entity_id=" . $productId . " and B.media_type='external-video'";
+                            left join " . $this->videoTable . "  C on C.value_id = A.value_id
+                            where A.entity_id=" . $productId . " and B.media_type='external-video'";
                         }
                         $videoData = $this->db->query($query)->fetchAll();
                         foreach ($globalVideoArray as $key => $videoArray) {
                             foreach ($videoArray as $video) {
                                 $videoUrl = $video;
                                 foreach ($videoData as $k => $value) {
-                                    if ($key == 0) {
+                                    if ((int)$value['metadata'] != (int)$value['store_id']) {
                                         if ($value['url'] == $videoUrl) {
-                                            $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=" . $value['store_id'];
+                                            $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id =" . $value['store_id'];
                                             $this->db->query($updateQuery);
                                         }
                                     }
@@ -474,7 +465,6 @@ class Queue
 
                 // Delete one by one
                 $this->db->delete($this->table, ['job_id IN (?)' => $job['job_id']]);
-                
 
                 $this->db->insert($this->logTable, $iceCatLogArray);
                 

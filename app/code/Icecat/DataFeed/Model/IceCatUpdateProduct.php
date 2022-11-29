@@ -35,7 +35,7 @@ class IceCatUpdateProduct
     protected $_productReviewCollection;
     private File $file;
     private $moduleDataSetup;
-    public $globalImageArray;
+    public $globalMediaArray;
 
     /**
      * @param ProductResourceModel $productResource
@@ -221,6 +221,10 @@ class IceCatUpdateProduct
                     $newFileName = $tmpDir . $imageName;
                     /** read file from URL and copy it to the new destination */
                     $result = $this->file->read($image, $newFileName);
+
+                    // Updating file permission of the uploaded file
+                    $this->file->chmod($newFileName, 0777);
+                    
                     if ($result) {
                         if ($i == 0) {
                             $product->addImageToMediaGallery($newFileName, ['image', 'small_image', 'thumbnail'], false, false);
@@ -229,7 +233,7 @@ class IceCatUpdateProduct
                         }
                         $i++;
                     }
-                    $globalImageArray[$storeId][] = $imageName;
+                    $globalMediaArray['image'][$storeId][] = $imageName;
                 }
             }
         }
@@ -240,31 +244,36 @@ class IceCatUpdateProduct
                 foreach ($productMultiMediaData as $multiMediaData) {
                     if ($multiMediaData['IsVideo']) {
                         if (strpos($multiMediaData['URL'], 'youtube') !== false) {
-                            $videoData = [
-                                'video_id' => $multiMediaData['ID'], //set your video id
-                                'video_title' => $multiMediaData['Description'], //set your video title
-                                'video_description' => $multiMediaData['Description'], //set your video description
-                                'thumbnail' => "image path", //set your video thumbnail path.
-                                'video_provider' => "youtube",
-                                'video_metadata' => null,
-                                'video_url' => $multiMediaData['URL'], //set your youtube channel's video url
-                                'media_type' => \Magento\ProductVideo\Model\Product\Attribute\Media\ExternalVideoEntryConverter::MEDIA_TYPE_CODE,
-                                'thumbnail_url' => ($multiMediaData['ThumbUrl'] ?? $multiMediaData['PreviewUrl']),
-                                'store_id' => $storeId
-                            ];
-
-                            // Add video to the product
-                            $mediaTmpDiretory = $this->getMediaDirTmpDir();
-                            if ($product->hasGalleryAttribute()) {
-                                $this->videoGalleryProcessor->addVideo(
-                                    $product->getId(),
-                                    $videoData,
-                                    $storeId,
-                                    ['image', 'small_image', 'thumbnail'],
-                                    false,
-                                    false,
-                                    $mediaTmpDiretory
-                                );
+                            $videoUrl = $multiMediaData['URL'];
+                            $headers = get_headers("https://www.youtube.com/oembed?url=$videoUrl");
+                            if(strpos($headers[0], '200')) {
+                                $videoData = [
+                                    'video_id' => $multiMediaData['ID'], //set your video id
+                                    'video_title' => $multiMediaData['Description'], //set your video title
+                                    'video_description' => $multiMediaData['Description'], //set your video description
+                                    'thumbnail' => "image path", //set your video thumbnail path.
+                                    'video_provider' => "youtube",
+                                    'video_metadata' => $storeId,
+                                    'video_url' => $multiMediaData['URL'], //set your youtube channel's video url
+                                    'media_type' => \Magento\ProductVideo\Model\Product\Attribute\Media\ExternalVideoEntryConverter::MEDIA_TYPE_CODE,
+                                    'thumbnail_url' => ($multiMediaData['ThumbUrl'] ? $multiMediaData['ThumbUrl']: $multiMediaData['PreviewUrl']),
+                                    'store_id' => $storeId
+                                ];
+    
+                                // Add video to the product
+                                $mediaTmpDiretory = $this->getMediaDirTmpDir();
+                                if ($product->hasGalleryAttribute()) {
+                                    $videoName = $this->videoGalleryProcessor->addVideo(
+                                            $product->getId(),
+                                            $videoData,
+                                            $storeId,
+                                            ['image', 'small_image', 'thumbnail'],
+                                            false,
+                                            false,
+                                            $mediaTmpDiretory
+                                        );
+                                    $globalMediaArray['video'][$storeId][] = $multiMediaData['URL'];
+                                }
                             }
                         }
                     }
@@ -490,7 +499,7 @@ class IceCatUpdateProduct
                 );
             }
         }
-        return $globalImageArray;
+        return $globalMediaArray;
     }
 
     public function createProductReview($reviewDetails)

@@ -17,6 +17,8 @@ use Magento\MediaStorage\Helper\File\Storage\Database;
 
 class Processor extends \Magento\Catalog\Model\Product\Gallery\Processor
 {
+    const PERMISSION_CODE_FOR_FILE = 0777;
+
     private CreateHandler $createHandler;
     private DirectoryList $directoryList;
     private File $file;
@@ -80,6 +82,7 @@ class Processor extends \Magento\Catalog\Model\Product\Gallery\Processor
             $finalName = $productId . '_' . $storeId . '_' . baseName($videoData['thumbnail_url']);
             /** read file from URL and copy it to the new destination */
             $result = $this->file->read($videoData['thumbnail_url'], $newFileName);
+            $result = $this->file->chmod($newFileName, self::PERMISSION_CODE_FOR_FILE);
         } else {
             $imageHelper = \Magento\Framework\App\ObjectManager::getInstance()->get(\Magento\Catalog\Helper\Image::class);
             $placeholder = $imageHelper->getDefaultPlaceholderUrl('image');
@@ -89,10 +92,11 @@ class Processor extends \Magento\Catalog\Model\Product\Gallery\Processor
             $finalName = baseName($placeholder);
             /** read file from URL and copy it to the new destination */
             $result = $this->file->read($placeholder, $newFileName);
+            $result = $this->file->chmod($newFileName,self::PERMISSION_CODE_FOR_FILE);
         }
 
         $product = $this->product->load($productId);
-        $product->setStoreId(0);
+        $product->setStoreId($storeId);
 
         $attrCode = $this->getAttribute()->getAttributeCode();
         $mediaGalleryData = $product->getData($attrCode);
