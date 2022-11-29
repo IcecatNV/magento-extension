@@ -42,6 +42,11 @@ class ProductData extends Action
     private $galleryTable;
 
     /**
+     * @var string
+     * */
+    private $videoTable;
+
+    /**
      * @var AdapterInterface
      * */
     private $db;
@@ -90,6 +95,7 @@ class ProductData extends Action
         $this->processor = $processor;
         $this->galleryEntitytable = $resourceConnection->getTableName('catalog_product_entity_media_gallery_value');
         $this->galleryTable = $resourceConnection->getTableName('catalog_product_entity_media_gallery');
+        $this->videoTable = $resourceConnection->getTableName('catalog_product_entity_media_gallery_value_video');
         $this->db = $objectManager->create(ResourceConnection::class)->getConnection('core_write');
         $this->columnExists = $resourceConnection->getConnection()->tableColumnExists('catalog_product_entity_media_gallery_value', 'entity_id');
     }
@@ -101,11 +107,12 @@ class ProductData extends Action
             $icecatStores = $this->data->getIcecatStoreConfig();
             $storeArray = explode(',', $icecatStores);
             $storeArrayForImage = explode(',', $icecatStores);
-            //$storeArray[] = 0; // Admin store
             $storeArrayForImage[] = 0; // Admin store
+            $globalMediaArray =[];
             $updatedStore = [];
             $errorMessage = null;
             $globalImageArray = [];
+            $globalVideoArray = [];
             foreach ($storeArrayForImage as $store) {
                 if ($this->data->isImportImagesEnabled()) {
                     $product = $this->productRepository->getById($productId, false, $store);
@@ -186,6 +193,7 @@ class ProductData extends Action
             }
 
             foreach ($storeArray as $store) {
+                
                 $product = $this->productRepository->getById($productId, false, $store);
                 $language = $this->data->getStoreLanguage($store);
                 $icecatUri = $this->data->getIcecatUri($product, $language);
@@ -194,7 +202,9 @@ class ProductData extends Action
                     if (!empty($response) && !empty($response['Code'])) {
                         $errorMessage = $response['Message'];
                     } else {
-                        $globalImageArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalImageArray);
+                        $globalMediaArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalMediaArray);
+                        $globalImageArray = array_key_exists('image', $globalMediaArray)?$globalMediaArray['image']:[];
+                        $globalVideoArray = array_key_exists('video', $globalMediaArray)?$globalMediaArray['video']:[];
                         $storeData = $this->storeRepository->getById($store);
                         $updatedStore[] = $storeData->getName();
                     }
@@ -204,6 +214,8 @@ class ProductData extends Action
                     break;
                 }
             }
+
+            // Hide images from non-required stores
             if ($this->columnExists === false) {
                 $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id where A.row_id=" . $productId . " and B.media_type='image'";
             } else {
@@ -215,7 +227,9 @@ class ProductData extends Action
                     $imageData = explode('.', $image);
                     $imageName = $imageData[0];
                     foreach ($data as $k => $value) {
+                        
                         if ($key != $value['store_id']) {
+                            
                             if (strpos($value['value'], $imageName) !== false) {
                                 $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id=" . $value['store_id'];
                                 $this->db->query($updateQuery);
@@ -224,15 +238,40 @@ class ProductData extends Action
                     }
                 }
             }
+
+            // Hide video from non-required stores
+            if (!empty($globalVideoArray)) {
+                        
+                if ($this->columnExists === false) {
+                    $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id
+                    left join " . $this->videoTable . "  C on C.value_id = A.value_id
+                    where A.row_id=" . $productId . " and B.media_type='external-video'";
+                } else {
+                    $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id
+                    left join " . $this->videoTable . "  C on C.value_id = A.value_id
+                    where A.entity_id=" . $productId . " and B.media_type='external-video'";
+                }
+                $videoData = $this->db->query($query)->fetchAll();
+                foreach ($globalVideoArray as $key => $videoArray) {
+                    foreach ($videoArray as $video) {
+                        $videoUrl = $video;
+                        foreach ($videoData as $k => $value) {
+                            if ((int)$value['metadata'] != (int)$value['store_id']) {
+                                if ($value['url'] == $videoUrl) {
+                                    $updateQuery = "UPDATE " . $this->galleryEntitytable . " SET disabled=1 WHERE value_id=" . $value['value_id'] . " AND store_id =" . $value['store_id'];
+                                    $this->db->query($updateQuery);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if (count($updatedStore) > 0) {
-                //$this->messageManager->addSuccessMessage('Product updated successfully on ' . str_replace(", Admin", "", implode(' , ', $updatedStore)));
                 $result = ['success'=>1,'message'=>'Product updated successfully on ' . str_replace(", Admin", "", implode(' , ', $updatedStore))];
             } elseif (!empty($errorMessage)) {
-                //$this->messageManager->addErrorMessage($errorMessage);
                 $result = ['success'=>0,'message'=>$errorMessage];
             }
             $this->getResponse()->setBody(json_encode($result));
-            //return $this->_redirect('catalog/product/edit', ['id' => $productId, '_current' => true]);
         } catch (NoSuchEntityException $noSuchEntityException) {
         }
     }
