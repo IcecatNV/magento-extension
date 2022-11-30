@@ -574,14 +574,15 @@ class IceCatUpdateProduct
             ->query('SELECT value FROM ' . $table . ' WHERE path = "datafeed/icecat/root_category_id"')
             ->fetch();
         $parentId   = $category['value'];
-
+        
         $parentCategory = $this->categoryFactory->create()->load($parentId);
 
         $category = $this->categoryFactory->create();
         $category = $category->getCollection()
             ->addAttributeToFilter('icecat_category_id', $categoryId)
+            ->addAttributeToFilter('parent_id', $parentId)
             ->getFirstItem();
-
+             
         if (!$category->getId()) {
             $category->setPath($parentCategory->getPath())
                 ->setParentId($parentId)
