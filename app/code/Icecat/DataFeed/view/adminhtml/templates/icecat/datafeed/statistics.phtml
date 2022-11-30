@@ -21,7 +21,7 @@ $configTimezone = new DateTimeZone($timezone);
                         $datetime->setTimezone($configTimezone);
                         echo $datetime->format('Y-m-d H:i:s');
                     } else {
-                        echo '0';
+                        echo '';
                     }?>
                 </td>
             </tr>
@@ -34,7 +34,7 @@ $configTimezone = new DateTimeZone($timezone);
                         $datetime->setTimezone($configTimezone);
                         echo $datetime->format('Y-m-d H:i:s');
                     } else {
-                        echo '0';
+                        echo '';
                     }
                     ?>
                 </td>
@@ -68,7 +68,6 @@ $configTimezone = new DateTimeZone($timezone);
                 <td>
                     <?php
                     if (!empty($import_info['not_found'])) {
-                        //echo count(explode(',', $import_info['not_found']));
                         echo $import_info['not_found'];
                     } else {
                         echo '0';
@@ -109,7 +108,7 @@ $configTimezone = new DateTimeZone($timezone);
                     if (!empty($import_info['execution_type'])) {
                         echo ucwords($import_info['execution_type']);
                     } else {
-                        echo 'Import was not completed';
+                        echo '';
                     }
                     ?>
                 </td>
