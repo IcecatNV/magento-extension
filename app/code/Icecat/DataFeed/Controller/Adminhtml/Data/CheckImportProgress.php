@@ -36,7 +36,13 @@ class CheckImportProgress extends Action
     public function checkAction()
     {
         $result = $this->scheduler->fetchInprogressScheduleRecord();
-        if ($result) {
+        $automaticResult = $this->scheduler->fetchAutomaticScheduleRecord();
+        if ($automaticResult) {
+            $response = [
+                'status' => true,
+                'message' => 'Automatic import cron is running...',
+            ];
+        } elseif ($result) {
             $message = 'Full import cron is in progress...';
             if ($result['type'] == 'new_import') {
                 $message = 'Delta import corn is in progress...';

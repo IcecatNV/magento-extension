@@ -124,6 +124,16 @@ class Scheduler
             ->order('id ASC');
         return $this->db->query($query)->fetch();
     }
+    
+    public function fetchAutomaticScheduleRecord()
+    {
+        $query = $this->db->select()
+            ->from($this->table, '*')
+            ->where('status=?', 'in_progress')
+            ->where('queue_mode=?', 'automatic')
+            ->order('id ASC');
+        return $this->db->query($query)->fetch();
+    }
 
     /**
      * @param array $scheduler
