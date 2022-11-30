@@ -107,7 +107,7 @@
                     <field id="import_specification" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
                         <label>Import Specifications</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                        <comment>icecat_specification</comment>
+                        <comment>icecat_specifications</comment>
                     </field>
                     <field id="specification_header_color" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="0">
                         <label>Specifications Heading Color</label>
@@ -137,7 +137,7 @@
                     </field>
                     <field id="import_reasons_to_buy" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
                         <label>Import Reasons To Buy</label>
-                        <comment>icecat_reason_to_buy</comment>
+                        <comment>icecat_reasons_to_buy</comment>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                     <field id="import_bullet_points" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
