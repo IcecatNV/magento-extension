@@ -79,6 +79,7 @@ class ProductData extends Action
         IceCatUpdateProduct      $iceCatUpdateProduct,
         StoreRepositoryInterface $storeRepository,
         StoreManagerInterface    $storeManager,
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         ConfigInterface $config,
         Processor $processor,
         ResourceConnection $resourceConnection,
@@ -91,6 +92,7 @@ class ProductData extends Action
         $this->iceCatUpdateProduct = $iceCatUpdateProduct;
         $this->storeRepository = $storeRepository;
         $this->storeManager = $storeManager;
+        $this->_scopeConfig = $scopeConfig;
         $this->config = $config;
         $this->processor = $processor;
         $this->galleryEntitytable = $resourceConnection->getTableName('catalog_product_entity_media_gallery_value');
@@ -102,6 +104,12 @@ class ProductData extends Action
 
     public function execute()
     {
+        $configurationSelectedStores = explode(",",$this->_scopeConfig->getValue('datafeed/icecat_store_config/stores', \Magento\Store\Model\ScopeInterface::SCOPE_STORE));
+        $configWebsiteId = [];
+        foreach($configurationSelectedStores as $configurationSelectedStore) {
+            $configWebsiteId[] = (int)$this->storeManager->getStore($configurationSelectedStore)->getWebsiteId();
+        }
+        $confidWebsiteIds = array_unique($configWebsiteId);
         $productId = $this->_request->getParam('id');
         try {
             $icecatStores = $this->data->getIcecatStoreConfig();
@@ -113,6 +121,10 @@ class ProductData extends Action
             $errorMessage = null;
             $globalImageArray = [];
             $globalVideoArray = [];
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $product = $objectManager->create('Magento\Catalog\Model\Product')->load($productId);
+            $productWebsiteIds = $product->getWebsiteIds();
+            $storeDifferencess = array_diff($confidWebsiteIds, $productWebsiteIds);
             foreach ($storeArrayForImage as $store) {
                 if ($this->data->isImportImagesEnabled()) {
                     $product = $this->productRepository->getById($productId, false, $store);
@@ -179,17 +191,23 @@ class ProductData extends Action
                     }
                     $allstoreArr[] = $eachstore->getId();
                 }
-                foreach ($allstoreArr as $eachstore) {
-                    $storeData = $this->storeRepository->getById($eachstore);
-                    $storeManager = $objectManager->get(StoreManagerInterface::class);
-                    $storeGroup = $objectManager->get(GroupInterfaceFactory::class)->create()->load($storeData->getData('group_id'));
-                    if (in_array($eachstore, $storeArray)) {
-                        $storeGroup->setRootCategoryId($icecatCid);
-                    } else {
-                        $storeGroup->setRootCategoryId(2);
+                if(empty($storeDifferencess)) {
+                    foreach ($configurationSelectedStores as $eachstore) {
+                        $storeData = $this->storeRepository->getById($eachstore);
+                        $storeManager = $objectManager->get(StoreManagerInterface::class);
+                        $storeGroup = $objectManager->get(GroupInterfaceFactory::class)->create()->load($storeData->getData('group_id'));
+                        if (in_array($eachstore, $storeArray)) {
+                            $storeGroup->setRootCategoryId($icecatCid);
+                        } else {
+                            $storeGroup->setRootCategoryId(2);
+                        }
+                        $objectManager->create(GroupResource::class)->save($storeGroup);
                     }
-                    $objectManager->get(GroupResource::class)->save($storeGroup);
+                } else {
+                    $logger = \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class);
+                    $logger->info("ProductID :".$productId." does not exist in the website's: ". json_encode($storeDifferencess));
                 }
+
             }
 
             foreach ($storeArray as $store) {
