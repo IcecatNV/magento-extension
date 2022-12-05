@@ -19,6 +19,7 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Api\Data\GroupInterfaceFactory;
 use Magento\Store\Model\ResourceModel\Group as GroupResource;
 use Magento\Store\Api\StoreWebsiteRelationInterface;
+use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 
 class Queue
 {
@@ -95,6 +96,10 @@ class Queue
      */
     private $storeWebsiteRelation;
 
+     /**
+     * @var Config|ConfigInterface
+     */
+    private $config;
 
     /**
      * @param CollectionFactory $collectionFactory
@@ -110,6 +115,7 @@ class Queue
      * @param ObjectManagerInterface $objectManager
      * @param StoreRepositoryInterface $StoreRepositoryInterface
      * @param GroupInterfaceFactory $GroupInterfaceFactory
+     * @param ConfigInterface $config
      */
     public function __construct(
         CollectionFactory $collectionFactory,
@@ -125,7 +131,8 @@ class Queue
         \Magento\Customer\Api\Data\GroupInterfaceFactory $GroupInterfaceFactory,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         StoreWebsiteRelationInterface $storeWebsiteRelation,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        ConfigInterface $config,
     ) {
         $this->collectionFactory = $collectionFactory;
         $this->table = $resourceConnection->getTableName('icecat_datafeed_queue');
@@ -148,6 +155,7 @@ class Queue
         $this->galleryTable = $resourceConnection->getTableName('catalog_product_entity_media_gallery');
         $this->videoTable = $resourceConnection->getTableName('catalog_product_entity_media_gallery_value_video');
         $this->columnExists = $resourceConnection->getConnection()->tableColumnExists('catalog_product_entity_media_gallery_value', 'entity_id');
+        $this->config = $config;
     }
 
     public function addJobToQueue($uniqueScheduledId)
@@ -371,6 +379,11 @@ class Queue
                                 $categoryFactory = $objectManager->get('\Magento\Catalog\Model\CategoryFactory');
                                 $collection = $categoryFactory->create()->getCollection()->addAttributeToFilter('name', "Icecat Categories")->setPageSize(1);
                                 $icecatCid = $collection->getFirstItem()->getId();
+                                $icecatRootCategoryExist = $this->_scopeConfig->getValue('datafeed/icecat/root_category_id', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+                                if(empty($icecatRootCategoryExist))
+                                {
+                                    $this->config->saveConfig('datafeed/icecat/root_category_id', $icecatCid, 'default', 0);
+                                }
                             }
 
                             $allstores = $this->storeRepository->getList();
