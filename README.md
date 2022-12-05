@@ -92,7 +92,8 @@ To install this extension, use the following commands:
 
     ![img1](./doc/images/image28.png)
 
-- Single Product Import - On the product details page, the user has flexibility to import single product data on demand.
+- Single Product Import - On the product details page, the user has flexibility to import single product data on    demand.
+
 ![img1](./doc/images/image2.png)
 
 **Icecat Categories**
