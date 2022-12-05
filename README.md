@@ -69,8 +69,7 @@ To install this extension, use the following commands:
 ![img1](./doc/images/image15.png)
 
 - Icecat Media - Images and YouTube videos -only public- are imported into the Magento’s default “Images And Videos'' section. If more than one store is configured, the user will see all the images and videos in the Default Store View.  However, once a particular store view is enabled, images and videos will be active for that store view and all the images and videos from other stores views will be marked as hidden. 
- 
-- All the documents are stored in the table icecat_product_attachtment.
+All the documents are stored in the table icecat_product_attachtment.
 ![img1](./doc/images/image30.png)
 
 - Icecat Specifications - All the specifications are imported into the icecat_specifications attribute with default Icecat heading color. The user has flexibility to change the color in order to match their Web shop’s theme.
