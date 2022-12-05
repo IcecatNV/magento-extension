@@ -78,13 +78,15 @@ To install this extension, use the following commands:
 
 - Icecat Other Enriched Fields - Icecat Product Reviews are stored in the table icecat_product_reviews. All the remaining fields are Magento attributes and have been created by default during the Icecat extension installation.
 
-![img1](./doc/images/image23.png)
+    ![img1](./doc/images/image23.png)
 
 - Icecat Basic Fields - By default all the basic Icecat attributes will be created and mapped in order to save the time. Only the standard Magento attributes are required to be mapped by the Magento user. The user has flexibility to keep only the required fields as per need.
-![img1](./doc/images/image11.png)
+
+    ![img1](./doc/images/image11.png)
 
 - Recurring bulk imports - Users will be able to automate full import with the cron expression.Full Import takes all the products from the Magento product catalog and for the matched products in the Icecat catalog, imports back the specified product data into the Magento catalog as per the configurations.Delta Import takes all the products which have been updated in the Magento product catalog since the last full/automatic import run.
-![img1](./doc/images/image28.png)
+
+    ![img1](./doc/images/image28.png)
 
 - Single Product Import - On the product details page, the user has flexibility to import single product data on demand.
 ![img1](./doc/images/image2.png)
