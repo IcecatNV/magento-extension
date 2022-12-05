@@ -42,6 +42,7 @@ To install this extension, use the following commands:
 - Complete downloadable import job summary statistics for immediate action.
 
 **MIT license And Contact Details**
+
 ![img1](./doc/images/image19.png)
 
 **Configuration Details**
