@@ -104,46 +104,52 @@ To install this extension, use the following commands:
 
 **Product Data Details**
 - On the product details page, all the Icecat product data will be available under the highlighted sections.
-![img1](./doc/images/image10.png)
+    ![img1](./doc/images/image10.png)
 
 - Content
-![img1](./doc/images/image12.png)
+    ![img1](./doc/images/image12.png)
 
-![img1](./doc/images/image1.png)
+    ![img1](./doc/images/image1.png)
 
 - Icecat Product Reviews
-![img1](./doc/images/image3.png)
+
+    ![img1](./doc/images/image3.png)
 
 - Icecat Product Attachments
-![img1](./doc/images/image9.png)
+
+    ![img1](./doc/images/image9.png)
 
 - Icecat Product Content
-![img1](./doc/images/image21.png)
 
-![img1](./doc/images/image7.png)
+    ![img1](./doc/images/image21.png)
 
-![img1](./doc/images/image5.png)
+    ![img1](./doc/images/image7.png)
 
-![img1](./doc/images/image4.png)
+    ![img1](./doc/images/image5.png)
+
+    ![img1](./doc/images/image4.png)
 
 - Bullet Points
-![img1](./doc/images/image22.png)
+
+    ![img1](./doc/images/image22.png)
 
 - Images And Videos
-![img1](./doc/images/image13.png)
+
+    ![img1](./doc/images/image13.png)
 
 YouTube Video View
-![img1](./doc/images/image25.png)
+
+    ![img1](./doc/images/image25.png)
 
 **Related Products**
 While importing the product from Icecat Catalog, all the related products will be searched in the Magento Catalog using Brand Name and Product Code. All the matched products will be then linked under the main product.
 
 **Import Statistics**
 
-![img1](./doc/images/image17.png)
+    ![img1](./doc/images/image17.png)
 
 Not found in Icecat: These are the products present in the Magento Catalog but not in the Icecat Catalog. If you would like to publish these products into Icecat, contact us.
  
 Forbidden in Icecat: A full icecat subscription is required to access these products.
 
-![img1](./doc/images/image27.png)
+    ![img1](./doc/images/image27.png)
