@@ -66,11 +66,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         Context               $context,
         StoreManagerInterface $storeManager,
         Json                  $serialize,
-        IcecatDatafeedQueueLog $icecatQueueLog
+        IcecatDatafeedQueueLog $icecatQueueLog,
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
     ) {
         $this->_storeManager = $storeManager;
         $this->serialize = $serialize;
         $this->_icecatQueueLog = $icecatQueueLog;
+        $this->_scopeConfig = $scopeConfig;
         parent::__construct($context);
     }
 
@@ -297,5 +299,33 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getTimezone()
     {
         return $this->scopeConfig->getValue(self::XML_PATH_TIMEZONE);
+    }
+    public function validateToken()
+    {
+        $username = $this->_scopeConfig->getValue('datafeed/authentication/username', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        $accessToken = $this->_scopeConfig->getValue('datafeed/authentication/access_token', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => 'https://live.icecat.biz/api/?UserName=' . $username . 'type&Language=en&gtin=5397063929863',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => [
+                'api-token: ' . $accessToken
+            ],
+
+        ]);
+
+        $response = curl_exec($curl);
+        $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+        return $response= [
+            'response' => $response,
+            'httpcode' => $httpcode
+        ];
     }
 }
