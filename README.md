@@ -84,7 +84,11 @@ To install this extension, use the following commands:
 
     ![img1](./doc/images/image11.png)
 
-- Recurring bulk imports - Users will be able to automate full import with the cron expression.Full Import takes all the products from the Magento product catalog and for the matched products in the Icecat catalog, imports back the specified product data into the Magento catalog as per the configurations.Delta Import takes all the products which have been updated in the Magento product catalog since the last full/automatic import run.
+- Recurring bulk imports - Users will be able to automate full import with the cron expression.
+    
+    Full Import takes all the products from the Magento product catalog and for the matched products in the Icecat catalog, imports back the specified product data into the Magento catalog as per the configurations.
+    
+    Delta Import takes all the products which have been updated in the Magento product catalog since the last full/automatic import run.
 
     ![img1](./doc/images/image28.png)
 
