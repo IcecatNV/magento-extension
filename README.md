@@ -139,17 +139,17 @@ To install this extension, use the following commands:
 
 YouTube Video View
 
-    ![img1](./doc/images/image25.png)
+![img1](./doc/images/image25.png)
 
 **Related Products**
 While importing the product from Icecat Catalog, all the related products will be searched in the Magento Catalog using Brand Name and Product Code. All the matched products will be then linked under the main product.
 
 **Import Statistics**
 
-    ![img1](./doc/images/image17.png)
+![img1](./doc/images/image17.png)
 
 Not found in Icecat: These are the products present in the Magento Catalog but not in the Icecat Catalog. If you would like to publish these products into Icecat, contact us.
  
 Forbidden in Icecat: A full icecat subscription is required to access these products.
 
-    ![img1](./doc/images/image27.png)
+![img1](./doc/images/image27.png)
