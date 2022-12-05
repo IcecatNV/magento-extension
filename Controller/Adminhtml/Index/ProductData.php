@@ -182,6 +182,11 @@ class ProductData extends Action
                     $categoryFactory = $objectManager->get('\Magento\Catalog\Model\CategoryFactory');
                     $collection = $categoryFactory->create()->getCollection()->addAttributeToFilter('name', "Icecat Categories")->setPageSize(1);
                     $icecatCid = $collection->getFirstItem()->getId();
+                    $icecatRootCategoryExist = $this->_scopeConfig->getValue('datafeed/icecat/root_category_id', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+                    if(empty($icecatRootCategoryExist))
+                    {
+                        $this->config->saveConfig('datafeed/icecat/root_category_id', $icecatCid, 'default', 0);
+                    }
                 }
 
                 $allstores = $this->storeRepository->getList();
