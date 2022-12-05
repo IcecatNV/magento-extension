@@ -1,0 +1,18 @@
+<script type="text/javascript">
+    function import_prod_info(){
+        let text = "You are about to update all the products. Do you wish to continue?";
+        if (confirm(text) == true) {
+            new Ajax.Request('<?php echo \Magento\Framework\App\ObjectManager::getInstance()->get('\Magento\Backend\Model\UrlInterface')->getUrl('icecat/data/importproductinfo'); ?>', {
+                method:     'get',
+                onSuccess: function(transport) {
+                    var import_info = JSON.parse(transport.responseText);
+                    if (import_info.success) {
+                        alert(import_info.message);
+                    }
+                }
+            });
+        }
+    }
+
+</script>
+<?php echo $block->getButtonHtml(); ?>

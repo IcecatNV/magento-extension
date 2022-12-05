@@ -1,0 +1,34 @@
+<script type="text/javascript">
+    function import_new_prod_info() {
+        let text = "You are about to update new and modified products since the last job run. Do you wish to continue?";
+        if (confirm(text) == true) {
+            new Ajax.Request('<?php echo \Magento\Framework\App\ObjectManager::getInstance()->get('\Magento\Backend\Model\UrlInterface')->getUrl('icecat/data/importnewproductinfo'); ?>', {
+                method:     'get',
+                onSuccess: function(transport){
+                    var import_info = JSON.parse(transport.responseText);
+                    if (import_info.success) {
+                        alert(import_info.message);
+                    }
+                }
+            });
+        }
+    }
+
+    function getCronStatus(){
+        new Ajax.Request('<?php echo \Magento\Framework\App\ObjectManager::getInstance()->get('\Magento\Backend\Model\UrlInterface')->getUrl('icecat/data/CheckImportProgress'); ?>', {
+            method:     'get',
+            onCreate: function(request) {
+                Ajax.Responders.unregister(varienLoaderHandler.handler);
+            },
+            onSuccess: function(transport){
+                var response = JSON.parse(transport.responseText);
+                document.getElementById("progress").innerHTML = response.message;
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        setInterval(getCronStatus,5000);
+    });
+</script>
+<?php echo $block->getButtonHtml(); ?>

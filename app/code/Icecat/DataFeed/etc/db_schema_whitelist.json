@@ -1,0 +1,105 @@
+{
+    "icecat_product_attachment": {
+        "column": {
+            "id": true,
+            "product_id": true,
+            "attachment_type": true,
+            "attachment_file": true,
+            "store_id": true,
+            "title": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ICECAT_PRD_ATTACHMENT_PRD_ID_CAT_PRD_ENTT_ENTT_ID": true
+        }
+    },
+    "icecat_product_attachment_title": {
+        "column": {
+            "id": true,
+            "attachment_id": true,
+            "store_id": true,
+            "title": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ICECAT_PRD_ATTACHMENT_TTL_ATTACHMENT_ID_ICECAT_PRD_ATTACHMENT_ID": true
+        }
+    },
+    "icecat_product_review": {
+        "column": {
+            "id": true,
+            "product_id": true,
+            "store_id": true,
+            "source": true,
+            "description": true,
+            "score": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ICECAT_PRD_REVIEW_PRD_ID_CAT_PRD_ENTT_ENTT_ID": true
+        }
+    },
+    "icecat_log": {
+        "column": {
+            "id": true,
+            "start_datetime": true,
+            "end_datetime": true,
+            "total_records": true,
+            "success_records": true,
+            "error_records": true,
+            "execution_type": true,
+            "product_ids": true,
+            "log_file": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "icecat_datafeed_queue": {
+        "column": {
+            "job_id": true,
+            "pid": true,
+            "data": true,
+            "max_retries": true,
+            "retries": true,
+            "error_log": true,
+            "data_size": true,
+            "created": true,
+            "locked_at": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "icecat_datafeed_queue_log": {
+        "column": {
+            "id": true,
+            "job_id": true,
+            "started": true,
+            "duration": true,
+            "processed_jobs": true,
+            "imported_record": true,
+            "unsuccessful_record": true,
+            "product_ids": true,
+            "product_ids_with_missing_gtin_product_code": true,
+            "ended": true,
+            "error_log": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "icecat_datafeed_queue_archive": {
+        "column": {
+            "id": true,
+            "pid": true,
+            "data": true,
+            "error_log": true,
+            "data_size": true,
+            "created_at": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}

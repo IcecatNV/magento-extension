@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="cms_page_listing_data_source" xsi:type="string">Magento\Cms\Model\ResourceModel\Page\Grid\Collection</item>
+                <item name="cms_block_listing_data_source" xsi:type="string">Magento\Cms\Model\ResourceModel\Block\Grid\Collection</item>
+                <item name="sales_order_grid_data_source" xsi:type="string">Magento\Sales\Model\ResourceModel\Order\Grid\Collection</item>
+                <item name="sales_order_invoice_grid_data_source" xsi:type="string">Magento\Sales\Model\ResourceModel\Order\Invoice\Grid\Collection</item>
+                <item name="sales_order_shipment_grid_data_source" xsi:type="string">Magento\Sales\Model\ResourceModel\Order\Shipment\Grid\Collection</item>
+                <item name="sales_order_creditmemo_grid_data_source" xsi:type="string">Magento\Sales\Model\ResourceModel\Order\Creditmemo\Grid\Collection</item>
+                <item name="customer_listing_data_source" xsi:type="string">Magento\Customer\Model\ResourceModel\Grid\Collection</item>
+                <item name="customer_online_grid_data_source" xsi:type="string">Magento\Customer\Model\ResourceModel\Online\Grid\Collection</item>
+                <item name="customer_group_listing_data_source" xsi:type="string">Magento\Customer\Model\ResourceModel\Group\Grid\Collection</item>
+                <item name="url_rewrite_listing_data_source" xsi:type="string">Magento\UrlRewrite\Ui\Component\UrlRewrite\DataProvider\SearchResult</item>
+                <item name="search_synonyms_grid_data_source" xsi:type="string">Magento\Search\Model\ResourceModel\Synonyms\Grid\Collection</item>
+                <item name="pagebuilder_template_grid_data_source" xsi:type="string">Magento\PageBuilder\Model\ResourceModel\Template\Grid\Collection</item>
+                <item name="design_config_listing_data_source" xsi:type="string">Magento\Theme\Model\ResourceModel\Design\Config\Grid\Collection</item>
+                <item name="design_theme_listing_data_source" xsi:type="string">Magento\Theme\Ui\Component\Theme\DataProvider\SearchResult</item>
+                <item name="bulk_listing_data_source" xsi:type="string">Magento\AsynchronousOperations\Ui\Component\DataProvider\SearchResult</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <virtualType name="Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\Pool">
+        <arguments>
+            <argument name="modifiers" xsi:type="array">
+                <item name="icecat_product_attachment" xsi:type="array">
+                    <item name="class" xsi:type="string">Icecat\DataFeed\Ui\DataProvider\Product\Form\Modifier\CustomTab</item>
+                    <item name="sortOrder" xsi:type="number">10</item>
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\Pool">
+        <arguments>
+            <argument name="modifiers" xsi:type="array">
+                <item name="icecat_product_review" xsi:type="array">
+                    <item name="class" xsi:type="string">Icecat\DataFeed\Ui\DataProvider\Product\Form\Modifier\ReviewTab</item>
+                    <item name="sortOrder" xsi:type="number">10</item>
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\Pool">
+        <arguments>
+            <argument name="modifiers" xsi:type="array">
+                <item name="icecat_product_review" xsi:type="array">
+                    <item name="class" xsi:type="string">Icecat\DataFeed\Ui\DataProvider\Product\Form\Modifier\ReviewTab</item>
+                    <item name="sortOrder" xsi:type="number">10</item>
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="icecat_queue_report_listing_data_source" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueue\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type> 
+    <virtualType name="Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueue\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments> 
+            <argument name="mainTable" xsi:type="string">icecat_datafeed_queue</argument>
+            <argument name="resourceModel" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueue</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="icecat_queue_log_report_listing_data_source" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueueLog\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+     <virtualType name="Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueueLog\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">icecat_datafeed_queue_log</argument>
+            <argument name="resourceModel" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueueLog</argument>
+        </arguments>
+    </virtualType>
+
+   
+
+</config>
