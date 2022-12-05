@@ -94,12 +94,13 @@ To install this extension, use the following commands:
 
 - Single Product Import - On the product details page, the user has flexibility to import single product data on    demand.
 
-![img1](./doc/images/image2.png)
+    ![img1](./doc/images/image2.png)
 
 **Icecat Categories**
 
-- Icecat Categories - On very first import, automatically a new root category named “Icecat Categories” will be created. 
-![img1](./doc/images/image24.png)
+- Icecat Categories - On very first import, automatically a new root category named “Icecat Categories” will be created.
+
+    ![img1](./doc/images/image24.png)
 
 **Product Data Details**
 - On the product details page, all the Icecat product data will be available under the highlighted sections.
