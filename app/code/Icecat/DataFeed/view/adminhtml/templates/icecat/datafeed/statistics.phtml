@@ -1,0 +1,153 @@
+<?php
+$import_info    = $block->collectData();
+$timezone       = $block->getTimezone();
+$configTimezone = new DateTimeZone($timezone);
+
+?>
+
+<div class="entry-edit-head admin__collapsible-block">
+    <table cellspacing="0" class="form-list" border>
+        <colgroup class="label"></colgroup>
+        <colgroup></colgroup>
+        <colgroup class="scope-label"></colgroup>
+        <colgroup class=""></colgroup>
+        <tbody>
+            <tr>
+                <td><strong><?php print "Start datetime"; ?>:</strong></td>
+                <td>
+                    <?php
+                    if (!empty($import_info['started'])) {
+                        $datetime = new DateTime($import_info['started']);
+                        $datetime->setTimezone($configTimezone);
+                        echo $datetime->format('Y-m-d H:i:s');
+                    } else {
+                        echo '';
+                    }?>
+                </td>
+            </tr>
+            <tr>
+                <td><strong><?php print "End datetime"; ?>:</strong></td>
+                <td>
+                    <?php
+                    if (!empty($import_info['ended'])) {
+                        $datetime = new DateTime($import_info['ended']);
+                        $datetime->setTimezone($configTimezone);
+                        echo $datetime->format('Y-m-d H:i:s');
+                    } else {
+                        echo '';
+                    }
+                    ?>
+                </td>
+            </tr>
+            <tr>
+                <td><strong><?php print "Total records found in Magento"; ?>:</strong></td>
+                <td>
+                    <?php
+                    if (!empty($import_info['total_record'])) {
+                        echo $import_info['total_record'];
+                    } else {
+                        echo '0';
+                    }
+                    ?>
+                </td>
+            </tr>
+            <tr>
+                <td><strong><?php print "Successfully processed"; ?>:</strong></td>
+                <td>
+                    <?php
+                    if (!empty($import_info['success_record'])) {
+                        echo $import_info['success_record'];
+                    } else {
+                        echo '0';
+                    }
+                    ?>
+                </td>
+            </tr>
+            <tr>
+                <td><strong><?php print "Not found in Icecat"; ?>:</strong></td>
+                <td>
+                    <?php
+                    if (!empty($import_info['not_found'])) {
+                        echo $import_info['not_found'];
+                    } else {
+                        echo '0';
+                    }
+                    ?>
+                </td>
+            </tr>
+            <tr>
+                <td><strong><?php print "Forbidden in Icecat"; ?>:</strong></td>
+                <td>
+                    <?php
+                    if (!empty($import_info['countof_four'])) {
+                        echo $import_info['countof_four'];
+                    } else {
+                        echo '0';
+                    }
+                    ?>
+                </td>
+            </tr>
+
+            <tr>
+                <td><strong><?php print "Missing Icecat attribute values"; ?>:</strong></td>
+                <td>
+                    <?php
+                    if (!empty($import_info['missing_gtin'])) {
+                        $productCount = count(explode(',', rtrim($import_info['missing_gtin'], ",")));
+                        echo $productCount;
+                    } else {
+                        echo '0';
+                    }
+                    ?>
+                </td>
+            </tr>
+            <tr>
+                <td><strong><?php print "Excecution type"; ?>:</strong></td>
+                <td>
+                    <?php
+                    if (!empty($import_info['execution_type'])) {
+                        echo ucwords($import_info['execution_type']);
+                    } else {
+                        echo '';
+                    }
+                    ?>
+                </td>
+            </tr>
+            <tr>
+                <td><strong><?php print "Detailed Log File"; ?>:</strong></td>
+                <td>
+                    <?php
+                    if (!empty($import_info['log_url'])) {
+                        ?>
+                        <a href="<?= $import_info['log_url'] ?>" download>Download</a>
+                        <?php
+                    } else {
+                        echo '&nbsp';
+                    }
+                    ?>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<style>
+    #row_icecat_stats_icecat_statistics_product_stats>td.label {
+        display: none;
+    }
+
+    .accordion .config .value {
+        padding-right: 40px;
+        vertical-align: middle;
+        width: 70%;
+    }
+    .accordion .form-inline .config td {
+        padding: 10px !important;
+    }
+    .accordion .form-inline .config td:first-child {
+        width: 200px !important;
+    }
+
+    /* .accordion .form-inline .config td:last-child {
+        width: 150px !important;
+    } */
+</style>
