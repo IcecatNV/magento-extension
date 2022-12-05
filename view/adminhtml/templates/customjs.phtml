@@ -1,0 +1,21 @@
+<script type="text/javascript">
+    function import_single_prod_info(linkurl){
+        let text = "You are about to update this single product from Icecat. Do you wish to continue?";
+        if (confirm(text) == true) {
+            new Ajax.Request(linkurl, {
+                method:     'post',
+                onSuccess: function(transport) {
+                    var import_info = JSON.parse(transport.responseText);
+                    if (import_info.success) {
+                        alert(import_info.message);
+                    }
+                    else
+                    {
+                        alert(import_info.message);
+                    }
+                    location.reload(true);
+                }
+            });
+        }
+    }
+</script>

@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="icecat_product_attachment" resource="default" engine="innodb" comment="Icecat Product Attachments">
+        <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true" comment="attachment id"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" comment="product id"/>
+        <column xsi:type="varchar" name="attachment_file" nullable="true" length="1000" comment="attachment file"/>
+        <column xsi:type="int" name="store_id"  unsigned="true" nullable="false" comment="store id"/>
+        <column xsi:type="varchar" name="title" nullable="true" length="1000" comment="attachment title"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+            referenceId="ICECAT_PRODUCT_ATTACHMENT_PRODUCT_ID_CATALOG_PRODUCT_ENTITY_ENTITY_ID"
+            table="icecat_product_attachment" column="product_id"
+            referenceTable="catalog_product_entity"
+            referenceColumn="entity_id"
+            onDelete="CASCADE"
+        />
+    </table>
+    <table name="icecat_product_review" resource="default" engine="innodb" comment="Icecat Product reviews">
+        <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true" comment="review id"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" comment="product id"/>
+        <column xsi:type="int" name="store_id"  unsigned="true" nullable="false" comment="store id"/>
+        <column xsi:type="varchar" name="source" nullable="true" length="1000" comment="review source"/>
+        <column xsi:type="text" name="description" nullable="true" comment="review description"/>
+        <column xsi:type="varchar" name="score" nullable="true" length="100" comment="score"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+            referenceId="ICECAT_PRODUCT_REVIEW_PRODUCT_ID_CATALOG_PRODUCT_ENTITY_ENTITY_ID"
+            table="icecat_product_review" column="product_id"
+            referenceTable="catalog_product_entity"
+            referenceColumn="entity_id"
+            onDelete="CASCADE"
+        />
+    </table>
+    <table name="icecat_datafeed_queue" resource="default" engine="innodb" comment="Icecat Data feed Queue Table">
+        <column xsi:type="int" name="job_id" unsigned="false" nullable="false" identity="true" comment="Job Id"/>
+        <column xsi:type="int" name="pid" unsigned="true" nullable="true" identity="false" comment="PID"/>
+        <column xsi:type="text" name="data" nullable="false" comment="Data"/>
+        <column xsi:type="int" name="max_retries" unsigned="true" nullable="false" default="3" identity="false" comment="Max Retries"/>
+        <column xsi:type="int" name="retries" unsigned="true" nullable="false" default="0" identity="false" comment="Retries"/>
+        <column xsi:type="text" name="error_log" nullable="true" comment="Error Log"/>
+        <column xsi:type="int" name="data_size" unsigned="true" nullable="true" identity="false" comment="Data Size"/>
+        <column xsi:type="text" name="schedule_unique_id" nullable="true" comment="Schedule Unique Id"/>
+        <column xsi:type="datetime" name="created" on_update="true" nullable="true" comment="Date and time of job creation"/>
+        <column xsi:type="datetime" name="locked_at" on_update="false" nullable="true" comment="Indicates time where PID was assigned to the job"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="job_id"/>
+        </constraint>
+    </table>
+    <table name="icecat_datafeed_queue_log" resource="default" engine="innodb" comment="icecat data feed  Queue Log Table">
+        <column xsi:type="int" name="id" unsigned="false" nullable="false" identity="true" comment="log Id"/>
+        <column xsi:type="int" name="job_id" unsigned="true" nullable="true" identity="false" comment="Job Id"/>
+        <column xsi:type="text" name="schedule_unique_id" nullable="true" comment="Schedule Unique Id"/>
+        <column xsi:type="datetime" name="started" on_update="false" nullable="true" comment="Queue Started Date Time"/>
+        <column xsi:type="datetime" name="ended" on_update="false" nullable="true" comment="Queue End Date Time"/>
+        <column xsi:type="int" name="duration" unsigned="true" padding="20" nullable="true" identity="false" comment="Duration"/>
+        <column xsi:type="text" name="error_log" nullable="true" comment="Error log"/>
+        <column xsi:type="int" name="imported_record" unsigned="true" nullable="true" identity="false" comment="Success Imported Product" />
+        <column xsi:type="int" name="unsuccessful_record" unsigned="true" nullable="true" identity="false" comment="Success Imported Product" />
+        <column xsi:type="text" name="product_ids" nullable="true" comment="Data"/>
+        <column xsi:type="text" name="product_ids_with_missing_gtin_product_code" nullable="true" comment="Data"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="icecat_datafeed_queue_archive" resource="default" engine="innodb" comment="Icecat Queue Archive Table">
+        <column xsi:type="int" name="id" unsigned="false" nullable="false" identity="true" comment="Archive Id"/>
+        <column xsi:type="int" name="pid" unsigned="true" nullable="true" identity="false" comment="PID"/>
+        <column xsi:type="text" name="data" nullable="false" comment="Data"/>
+        <column xsi:type="text" name="error_log" nullable="false" comment="Error Log"/>
+        <column xsi:type="int" name="data_size" unsigned="true" nullable="true" identity="false" comment="Data Size"/>
+        <column xsi:type="text" name="schedule_unique_id" nullable="true" comment="Schedule Unique Id"/>
+        <column xsi:type="datetime" name="created_at" on_update="true" nullable="true" comment="Date and time of job creation"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="icecat_queue_scheduler" resource="default" engine="innodb" comment="Icecat Queue Archive Table">
+        <column xsi:type="int" name="id" unsigned="false" nullable="false" identity="true" comment="scheduler Id"/>
+        <column xsi:type="datetime" name="started" on_update="false" nullable="true" comment="scheduled at"/>
+        <column xsi:type="datetime" name="ended" on_update="false" nullable="true" comment="scheduler end at"/>
+        <column xsi:type="text" name="type" nullable="false" comment="schedule type"/>
+        <column xsi:type="text" name="status" nullable="false" comment="scheduler status"/>
+        <column xsi:type="text" name="product_updated" nullable="false" comment="product updated"/>
+        <column xsi:type="text" name="product_failed" nullable="false" comment="product failed"/>
+        <column xsi:type="text" name="queue_mode" nullable="false" comment="Queue Mode"/>
+        <column xsi:type="text" name="cron_expression" nullable="true" comment="Cron Expression"/>
+        <column xsi:type="datetime" name="cron_run_time" nullable="true" comment="Cron Run Time"/>
+        <column xsi:type="text" name="schedule_unique_id" nullable="true" comment="Schedule Unique Id"/>
+        <column xsi:type="datetime" name="created_at" on_update="true" nullable="true" comment="Date and time of scheduler creation"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+</schema>
