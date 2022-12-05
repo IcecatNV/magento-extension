@@ -92,7 +92,7 @@ class Processor extends \Magento\Catalog\Model\Product\Gallery\Processor
             $finalName = baseName($placeholder);
             /** read file from URL and copy it to the new destination */
             $result = $this->file->read($placeholder, $newFileName);
-            $result = $this->file->chmod($newFileName,self::PERMISSION_CODE_FOR_FILE);
+            $result = $this->file->chmod($newFileName, self::PERMISSION_CODE_FOR_FILE);
         }
 
         $product = $this->product->load($productId);

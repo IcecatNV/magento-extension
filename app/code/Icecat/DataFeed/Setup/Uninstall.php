@@ -32,9 +32,9 @@ class Uninstall implements UninstallInterface
             ['c' => $tableNameForGroup],
             ['attribute_id']
         )
-       ->where(
-           "c.attribute_code  LIKE '%icecat_%'"
-       );
+        ->where(
+            "c.attribute_code  LIKE '%icecat_%'"
+        );
         $selectIds = $this->resourceConnection->getConnection()->fetchAll($select);
         if ($selectIds) {
             foreach ($selectIds as $groupId) {

@@ -104,9 +104,9 @@ class ProductData extends Action
 
     public function execute()
     {
-        $configurationSelectedStores = explode(",",$this->_scopeConfig->getValue('datafeed/icecat_store_config/stores', \Magento\Store\Model\ScopeInterface::SCOPE_STORE));
+        $configurationSelectedStores = explode(",", $this->_scopeConfig->getValue('datafeed/icecat_store_config/stores', \Magento\Store\Model\ScopeInterface::SCOPE_STORE));
         $configWebsiteId = [];
-        foreach($configurationSelectedStores as $configurationSelectedStore) {
+        foreach ($configurationSelectedStores as $configurationSelectedStore) {
             $configWebsiteId[] = (int)$this->storeManager->getStore($configurationSelectedStore)->getWebsiteId();
         }
         $confidWebsiteIds = array_unique($configWebsiteId);
@@ -191,7 +191,7 @@ class ProductData extends Action
                     }
                     $allstoreArr[] = $eachstore->getId();
                 }
-                if(empty($storeDifferencess)) {
+                if (empty($storeDifferencess)) {
                     foreach ($configurationSelectedStores as $eachstore) {
                         $storeData = $this->storeRepository->getById($eachstore);
                         $storeManager = $objectManager->get(StoreManagerInterface::class);

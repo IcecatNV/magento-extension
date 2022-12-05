@@ -91,8 +91,8 @@ class Queue
     protected $scopeConfig;
 
      /**
-     * @var StoreWebsiteRelationInterface
-     */
+      * @var StoreWebsiteRelationInterface
+      */
     private $storeWebsiteRelation;
 
 
@@ -270,15 +270,15 @@ class Queue
                     'started' => date('Y-m-d H:i:s'),
                 ];
 
-                $configurationSelectedStores = explode(",",$this->_scopeConfig->getValue('datafeed/icecat_store_config/stores', \Magento\Store\Model\ScopeInterface::SCOPE_STORE));
+                $configurationSelectedStores = explode(",", $this->_scopeConfig->getValue('datafeed/icecat_store_config/stores', \Magento\Store\Model\ScopeInterface::SCOPE_STORE));
                 $configWebsiteId = [];
-                foreach($configurationSelectedStores as $configurationSelectedStore) {
+                foreach ($configurationSelectedStores as $configurationSelectedStore) {
                     $configWebsiteId[] = (int)$this->storeManager->getStore($configurationSelectedStore)->getWebsiteId();
                 }
                 $confidWebsiteIds = array_unique($configWebsiteId);
                 $productIds = explode(',', $job['data']);
                 $productWithOutGtinAndProductCodeAndBrandCode = [];
-                $errorProductIds = []; 
+                $errorProductIds = [];
                 $successProducts = [];
                 $errorLog  = [];
                 $started = time();
@@ -365,7 +365,7 @@ class Queue
                             }
                             $allstoreArr[] = $eachstore->getId();
                         }
-                        if(empty($storeDifferencess)) {
+                        if (empty($storeDifferencess)) {
                             foreach ($configurationSelectedStores as $eachstore) {
                                 $storeData = $this->storeRepository->getById($eachstore);
                                 $storeManager = $objectManager->get(StoreManagerInterface::class);
@@ -410,7 +410,7 @@ class Queue
                         $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id where A.entity_id=" . $productId . " and B.media_type='image'";
                     }
                     $data = $this->db->query($query)->fetchAll();
-                    if(!empty($globalImageArray)) {
+                    if (!empty($globalImageArray)) {
                         foreach ($globalImageArray as $key => $imageArray) {
                             foreach ($imageArray as $image) {
                                 $imageData = explode('.', $image);

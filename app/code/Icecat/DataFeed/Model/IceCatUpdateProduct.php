@@ -69,7 +69,8 @@ class IceCatUpdateProduct
         CollectionFactory                             $productAttachmentCollection,
         ProductReviewFactory                          $productReview,
         ResourceModel\ProductReview\CollectionFactory $productReviewCollection,
-        File                                          $file
+        File                                          $file,
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
     ) {
         $this->data = $data;
         $this->productResource = $productResource;
@@ -86,6 +87,7 @@ class IceCatUpdateProduct
         $this->_productReview = $productReview;
         $this->_productReviewCollection = $productReviewCollection;
         $this->file = $file;
+        $this->_scopeConfig = $scopeConfig;
     }
 
     public function updateProductWithIceCatResponse(Product $product, $response, $storeId, $globalMediaArray)
@@ -133,10 +135,10 @@ class IceCatUpdateProduct
                         if ($flag === 'LEFT'):
                             $reasonsHtml .= ' <div class = "content-block"> <h5><b>' . $reasons['Title'] . '</b></h5>';
                             $reasonsHtml .= '<span>' . $reasons['Value'] . '</span></div>';
-                            $reasonsHtml .= ' <div class="image-block"><img class = "image-left"  alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /></div>';
+                            $reasonsHtml .= ' <div class="image-block"><img class = "image-left" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /></div>';
                             $flag = 'RIGHT';
                         else:
-                            $reasonsHtml .= '<div class = "image-block">  <img class = "image-right"  alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /> </div>';
+                            $reasonsHtml .= '<div class = "image-block">  <img class = "image-right" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /> </div>';
                             $reasonsHtml .= '<div class = "content-block"><h5><b>' . $reasons['Title'] . '</b></h5>';
                             $reasonsHtml .= '<span>' . $reasons['Value'] . '</span></div>';
 
@@ -377,7 +379,7 @@ class IceCatUpdateProduct
                     $specifications = $allSpecification['Features'];
                     foreach ($specifications as $specification) {
                         $data1['featureName']         = $specification['Feature']['Name']['Value'];
-                        $data1['featureValue']        = $specification['Value'];
+                        $data1['featureValue']        = $specification['PresentationValue'];
                         $data1['featureDescription']  = $specification['Description'];
                         $data1['mandatory']           = $specification['Mandatory'];
                         $features[$allSpecification['FeatureGroup']['Name']['Value']][] = $data1;
@@ -461,9 +463,10 @@ class IceCatUpdateProduct
                 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
                 $linkData = [];
                 foreach ($relatedProductData as $relatedProduct) {
-                    $productIcecatID = $relatedProduct['IcecatID'];
+                    $ProductIcecatProductCode = $relatedProduct['ProductCode'];
+                    $ProductIcecatBrand = $relatedProduct['Brand'];
                     $productSku = $product->getSku();
-                    $result = $this->searchProduct($productIcecatID);
+                    $result = $this->searchProductSku($ProductIcecatBrand,$ProductIcecatProductCode);
                     if ($result) {
                         $productLink = $objectManager->create('Magento\Catalog\Api\Data\ProductLinkInterface')
                             ->setSku($productSku)
@@ -636,6 +639,21 @@ class IceCatUpdateProduct
             return $productData[0]['sku'];
         }
 
+        return null;
+    }
+
+    protected function searchProductSku($ProductIcecatBrand,$ProductIcecatProductCode)
+    {
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $brandAttributeCode = $this->_scopeConfig->getValue('datafeed/product_brand_fetch_type/brand', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        $productCodeAttributeCode = $this->_scopeConfig->getValue('datafeed/product_brand_fetch_type/product_code', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        $collection = $objectManager->create('Magento\Catalog\Model\ResourceModel\Product\Collection');
+        $collection->addFieldToFilter($brandAttributeCode, ['eq' => $ProductIcecatBrand]);
+        $collection->addFieldToFilter($productCodeAttributeCode, ['eq' => $ProductIcecatProductCode]);
+        $productDataSku = $collection->getData();
+        if (count($productDataSku) > 0) {
+            return $productDataSku[0]['sku'];
+        }
         return null;
     }
 }
