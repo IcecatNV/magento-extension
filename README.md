@@ -59,7 +59,8 @@ To install this extension, use the following commands:
 ![img1](./doc/images/image26.png)
 
 - Icecat Configuration - One time attribute mapping is required to import the data via Icecat API. These attributes are created by the end user in the Magento environment and the icecat extension will use these attributes to match the product in the Icecat catalog.
-    **Notes:**
+
+    Notes:
     - The attributes scope must be global and of type text.
     - The attributes must be part of the attribute set used for the magento product catalog.
 ![img1](./doc/images/image29.png)
