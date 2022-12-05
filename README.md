@@ -144,6 +144,8 @@ YouTube Video View
 **Related Products**
 While importing the product from Icecat Catalog, all the related products will be searched in the Magento Catalog using Brand Name and Product Code. All the matched products will be then linked under the main product.
 
+![img1](./doc/images/image31.png)
+
 **Import Statistics**
 
 ![img1](./doc/images/image17.png)
