@@ -10,7 +10,7 @@
         "homepage": "https://icecat.com"
       }
    ],
-   "minimum-stability": "stable",
+   "minimum-stability": "dev",
    "version": "1.0.0",
    "require": {
     "magento/framework": "~102.0|~103.0",
