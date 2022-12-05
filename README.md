@@ -77,6 +77,7 @@ To install this extension, use the following commands:
 ![img1](./doc/images/image18.png)
 
 - Icecat Other Enriched Fields - Icecat Product Reviews are stored in the table icecat_product_reviews. All the remaining fields are Magento attributes and have been created by default during the Icecat extension installation.
+
 ![img1](./doc/images/image23.png)
 
 - Icecat Basic Fields - By default all the basic Icecat attributes will be created and mapped in order to save the time. Only the standard Magento attributes are required to be mapped by the Magento user. The user has flexibility to keep only the required fields as per need.
