@@ -129,7 +129,7 @@ class ProductData extends Action
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $product = $objectManager->create('Magento\Catalog\Model\Product')->load($productId);
             //Brand Filter Code - START
-            $isBrandsFilterEnabled = $this->_scopeConfig->getValue('datafeed/icecat_brands/icecat_brands_selections', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            /*$isBrandsFilterEnabled = $this->_scopeConfig->getValue('datafeed/icecat_brands/icecat_brands_selections', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
             if ($isBrandsFilterEnabled == 1) {
                 $brandAttributeCode = $this->_scopeConfig->getValue('datafeed/product_brand_fetch_type/brand', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
                 $selectedBrands = $this->_scopeConfig->getValue('datafeed/icecat_brands/multiple_brands', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
@@ -143,7 +143,7 @@ class ProductData extends Action
                     return false;
                     exit;
                 }
-            }
+            }*/
             //Brand Filter Code - END
             $productWebsiteIds = $product->getWebsiteIds();
             $storeDifferencess = array_diff($confidWebsiteIds, $productWebsiteIds);
