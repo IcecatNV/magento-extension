@@ -28,6 +28,9 @@
                     <import_bullet_points>0</import_bullet_points>
                 </other_fields>
             </product_attributes>
+            <icecat_brands>
+                <icecat_brands_selections>0</icecat_brands_selections>
+            </icecat_brands>
         </datafeed>
     </default>
 </config>

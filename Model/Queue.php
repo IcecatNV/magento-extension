@@ -132,7 +132,7 @@ class Queue
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         StoreWebsiteRelationInterface $storeWebsiteRelation,
         StoreManagerInterface $storeManager,
-        ConfigInterface $config,
+        ConfigInterface $config
     ) {
         $this->collectionFactory = $collectionFactory;
         $this->table = $resourceConnection->getTableName('icecat_datafeed_queue');
@@ -161,12 +161,22 @@ class Queue
     public function addJobToQueue($uniqueScheduledId)
     {
         $authResponse = $this->data->validateToken();
-        if($authResponse['httpcode'] != "400")
-        {
+        if($authResponse['httpcode'] != "400") {
             $productCollection = $this->getProductCollections();
             $productCollection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS);
             $productCollection->getSelect()->columns('entity_id');
             $collection1Ids = $productCollection->getAllIds();
+             //Brand Filter Code - START
+            $isBrandsFilterEnabled = $this->_scopeConfig->getValue('datafeed/icecat_brands/icecat_brands_selections', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            if ($isBrandsFilterEnabled == 1) {
+                $brandAttribute = $this->_scopeConfig->getValue('datafeed/product_brand_fetch_type/brand', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+                $selectedBrands = $this->_scopeConfig->getValue('datafeed/icecat_brands/multiple_brands', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+                $selectedBrandsArr = explode(",",$selectedBrands);
+                $collection = $productCollection->addAttributeToSelect($brandAttribute)
+                    ->addFieldToFilter($brandAttribute,['in' => $selectedBrandsArr]); 
+                $collection1Ids = array_column($collection->getData(), 'entity_id');
+            }
+            //Brand Filter Code - END
             sort($collection1Ids);
             $chunkedArray = array_chunk($collection1Ids, 50);
             foreach ($chunkedArray as $productids) {
@@ -180,9 +190,7 @@ class Queue
             }
 
             return true;
-        }
-        else
-        {
+        } else {
             echo "<script>alert('API is not Valid');</script>";
         }
     }
@@ -199,6 +207,17 @@ class Queue
         $productCollection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS);
         $productCollection->getSelect()->columns('entity_id');
         $collection1Ids = $productCollection->getAllIds();
+         //Brand Filter Code - START
+        $isBrandsFilterEnabled = $this->_scopeConfig->getValue('datafeed/icecat_brands/icecat_brands_selections', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        if ($isBrandsFilterEnabled == 1) {
+            $brandAttribute = $this->_scopeConfig->getValue('datafeed/product_brand_fetch_type/brand', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            $selectedBrands = $this->_scopeConfig->getValue('datafeed/icecat_brands/multiple_brands', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            $selectedBrandsArr = explode(",",$selectedBrands);
+            $collection = $productCollection->addAttributeToSelect($brandAttribute)
+                ->addFieldToFilter($brandAttribute,['in' => $selectedBrandsArr]); 
+            $collection1Ids = array_column($collection->getData(), 'entity_id');
+        }
+        //Brand Filter Code - END
         sort($collection1Ids);
         $chunkedArray = array_chunk($collection1Ids, 50);
         foreach ($chunkedArray as $productids) {

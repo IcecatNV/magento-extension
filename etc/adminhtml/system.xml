@@ -76,6 +76,23 @@
                 </field>
             </group>
             <!-- End Icecat Configuration -->
+            <!-- Brands Filter Configuration -->
+            <group id="icecat_brands" translate="label" type="text" sortOrder="55" showInDefault="1">
+                <label>Filter By Brands Mapping</label>
+                <field id="icecat_brands_selections" translate="label comment" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable</label>
+                    <source_model>Icecat\DataFeed\Model\Config\Source\BrandsSelectionsDropdown</source_model>
+                </field>
+                <field id="multiple_brands" translate="label" type="multiselect" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Select Brand(s)</label>
+                    <source_model>Icecat\DataFeed\Model\Config\Source\BrandMultiSelect</source_model>
+                    <depends>
+                        <field id="icecat_brands_selections">1</field>
+                    </depends>
+                    <comment>Please save the changes to apply brand filter.</comment>
+                </field>
+            </group>
+            <!-- End Brands Filter Configuration -->
             <!-- Product Attribute Configuration  -->
             <group id="product_attributes" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Icecat Attributes Mapping</label>
