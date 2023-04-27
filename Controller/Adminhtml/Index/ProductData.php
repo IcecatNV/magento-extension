@@ -20,7 +20,6 @@ use Magento\Store\Api\Data\GroupInterfaceFactory;
 use Magento\Store\Api\StoreRepositoryInterface;
 use Magento\Store\Model\ResourceModel\Group as GroupResource;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Catalog\Model\Product\Attribute\Repository;
 
 class ProductData extends Action
 {
@@ -84,8 +83,7 @@ class ProductData extends Action
         ConfigInterface $config,
         Processor $processor,
         ResourceConnection $resourceConnection,
-        ObjectManagerInterface $objectManager,
-        Repository $attributeRepository
+        ObjectManagerInterface $objectManager
 
     ) {
         parent::__construct($context);
@@ -102,7 +100,6 @@ class ProductData extends Action
         $this->galleryTable = $resourceConnection->getTableName('catalog_product_entity_media_gallery');
         $this->videoTable = $resourceConnection->getTableName('catalog_product_entity_media_gallery_value_video');
         $this->db = $objectManager->create(ResourceConnection::class)->getConnection('core_write');
-        $this->attributeRepository = $attributeRepository;
 
         $this->columnExists = $resourceConnection->getConnection()->tableColumnExists('catalog_product_entity_media_gallery_value', 'entity_id');
     }
@@ -128,23 +125,6 @@ class ProductData extends Action
             $globalVideoArray = [];
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $product = $objectManager->create('Magento\Catalog\Model\Product')->load($productId);
-            //Brand Filter Code - START
-            /*$isBrandsFilterEnabled = $this->_scopeConfig->getValue('datafeed/icecat_brands/icecat_brands_selections', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-            if ($isBrandsFilterEnabled == 1) {
-                $brandAttributeCode = $this->_scopeConfig->getValue('datafeed/product_brand_fetch_type/brand', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-                $selectedBrands = $this->_scopeConfig->getValue('datafeed/icecat_brands/multiple_brands', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-                $brandAttributeType = $this->attributeRepository->get($brandAttributeCode)->getFrontendInput();
-                $selectedBrandsArr = explode(",",$selectedBrands);
-                $productSelectedBrand = $product->getData($brandAttributeCode);
-                if (!in_array($productSelectedBrand, $selectedBrandsArr)) {
-                    $this->messageManager->addErrorMessage('There is no matching criteria of Brand');
-                    $result = ['success'=>0,'message'=>'There is no matching criteria of Brand.'];
-                    $this->getResponse()->setBody(json_encode($result));
-                    return false;
-                    exit;
-                }
-            }*/
-            //Brand Filter Code - END
             $productWebsiteIds = $product->getWebsiteIds();
             $storeDifferencess = array_diff($confidWebsiteIds, $productWebsiteIds);
             foreach ($storeArrayForImage as $store) {
