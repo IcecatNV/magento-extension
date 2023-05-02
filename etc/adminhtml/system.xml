@@ -36,9 +36,27 @@
                 <field id="access_token" type="password" translate="label" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Access Token</label>
                     <validate>required-entry</validate>
-                    <comment>
-                        <![CDATA[ <p><a href="https://icecat.biz/en/registration" target="_blank">Register with Icecat</a></p> <p><a href="https://icecat.biz/forgot" target="_blank">Forget Password</a></p> <p><a href="https://icecat.biz/mk/menu/contacts/index.html" target="_blank">Contact Us</a></p> ]]>
-                    </comment>
+                </field>
+                <field id="user_type"  sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0" type="select" >  
+                    <label>Full Icecat User:</label>
+                    <source_model>Icecat\DataFeed\Model\Config\Source\UserType</source_model>                    
+                </field> 
+                <field id="content_token" type="password" translate="label" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Content Token</label>
+                     <depends>
+                        <field id="datafeed/authentication/user_type" separator=",">1</field>
+                    </depends>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="app_key" type="password" translate="label" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>App Key</label>
+                    <depends>
+                        <field id="datafeed/authentication/user_type" separator=",">1</field>
+                    </depends>
+                   <validate>required-entry</validate>
+                </field>
+                <field id="custom_link" type="label" translate="label" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <frontend_model>Icecat\DataFeed\Block\Adminhtml\System\Config\IcecatLinks</frontend_model>
                 </field>
             </group>
             <!-- End Auth Configuration -->

@@ -97,10 +97,14 @@ class IceCatUpdateProduct
             mkdir($tmpMediaDir . "/tmp", 0755, true);
         }
 
+        $contentToken = $this->data->getContentToken();
+        $userType = $this->data->getUserType();
+
         $product->setStoreId($storeId);
         $product->setData('icecat_icecat_id', $response['data']['GeneralInfo']['IcecatId']);
 
         $attributeForMapping = $this->data->getProductAttributes();
+        
         $productData = $response['data'];
         if (!empty($attributeForMapping)) {
             $attributeArray = [];
@@ -226,7 +230,13 @@ class IceCatUpdateProduct
 
                     // Updating file permission of the uploaded file
                     $this->file->chmod($newFileName, 0777);
-                    
+                    if($userType == 'full' && !empty($contentToken))
+                    {
+                        $result = $this->file->read($image. '?content_token=' .$contentToken, $newFileName);     
+                    }else{
+                        $result = $this->file->read($image, $newFileName);
+                    }
+
                     if ($result) {
                         if ($i == 0) {
                             $product->addImageToMediaGallery($newFileName, ['image', 'small_image', 'thumbnail'], false, false);
@@ -304,6 +314,13 @@ class IceCatUpdateProduct
                         /** @var string $newFileName */
                         $newFileName    = $destinationPath . baseName($pdf);
                         $result         = $this->file->read($pdf, $newFileName);
+                        
+                        if($userType == 'full' && !empty($contentToken)){
+                            $result = $this->file->read($pdf.'?content_token='. $contentToken, $newFileName);
+                        }else{
+                            $result = $this->file->read($pdf, $newFileName);
+                        }
+
                         $relativePath   = 'doc/' . $currentStore->getId() . '/' . $product->getId() . '/' . $pdfName;
                         $pdfDetails     = [
                             'product_id'        => $product->getId(),
