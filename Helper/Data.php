@@ -354,7 +354,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'Password' => $this->getPassword(),
             'Session' => 'Rest'
         );
-
         $postData = json_encode($uid);
 
         if ($this->getIsModuleEnabled()) {
@@ -378,14 +377,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $response = json_decode(curl_exec($curl),true);
                     curl_close($curl);
                 } else {
-                    $response = __('Please enter username and password');
+                    $responseMessage = __('Please enter username and password');
+                    $response = ['Code'=> 400 ,'Error' => 'Bad Request','Message'=> $responseMessage];
                 }
             } catch (\Exception $e) {
-                $response = __('Something went wrong');
+                $responseMessage = __('Something went wrong');
+                $response = ['Code'=> 400 ,'Error' => 'Bad Request','Message'=> $responseMessage];
             }
         }else{
-            $response = __('Please Enable Module ');
+            $responseMessage = __('Please Enable Module ');
+            $response = ['Code'=> 400 ,'Error' => 'Bad Request','Message'=> $responseMessage];
         }
+        
         return $response;
     }
 

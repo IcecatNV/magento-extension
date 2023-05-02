@@ -139,10 +139,18 @@ class IceCatUpdateProduct
                         if ($flag === 'LEFT'):
                             $reasonsHtml .= ' <div class = "content-block"> <h5><b>' . $reasons['Title'] . '</b></h5>';
                             $reasonsHtml .= '<span>' . $reasons['Value'] . '</span></div>';
-                            $reasonsHtml .= ' <div class="image-block"><img class = "image-left" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /></div>';
+                            if ($userType == 'full' && !empty($contentToken)) {
+                                $reasonsHtml .= ' <div class="image-block"><img class = "image-left" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '?content_token='.$contentToken.'" /></div>';
+                            } else {
+                                $reasonsHtml .= ' <div class="image-block"><img class = "image-left" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /></div>';
+                            }
                             $flag = 'RIGHT';
                         else:
-                            $reasonsHtml .= '<div class = "image-block">  <img class = "image-right" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /> </div>';
+                            if ($userType == 'full' && !empty($contentToken)) {
+                                $reasonsHtml .= '<div class = "image-block">  <img class = "image-right" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '?content_token='. $contentToken.'" /> </div>';
+                            } else {
+                                $reasonsHtml .= '<div class = "image-block">  <img class = "image-right" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /> </div>';
+                            }
                             $reasonsHtml .= '<div class = "content-block"><h5><b>' . $reasons['Title'] . '</b></h5>';
                             $reasonsHtml .= '<span>' . $reasons['Value'] . '</span></div>';
 
@@ -203,8 +211,15 @@ class IceCatUpdateProduct
                     $html = "";
                     if ($data['URL'] != "") {
                         $pathinfo = pathinfo($data['URL']);
-                        $html = file_get_contents($data['URL']);
+                        if ($userType == 'full' && !empty($contentToken)) {
+                            $html = file_get_contents($data['URL'].'?content_token='. $contentToken);
+                        }else{
+                            $html = file_get_contents($data['URL']);
+                        }
                         $html = preg_replace("/src=\"/", 'src="' . $pathinfo['dirname'] . '/', $html);
+                        if ($userType == 'full' && !empty($contentToken)) {
+                            $html = preg_replace("/\" alt=\"/", '?content_token='. $contentToken .'" alt="', $html);
+                        }
                         $html = preg_replace("/href=\"/", 'href="' . $pathinfo['dirname'] . '/', $html);
                     }
                 }

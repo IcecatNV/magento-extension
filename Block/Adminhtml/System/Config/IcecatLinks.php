@@ -39,9 +39,11 @@ class IcecatLinks extends Field
     protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
     {
         $html = '';
-        $subscriptionLevel = $this->data->getUserType();        
-        if ($subscriptionLevel != 'full') {
-            $html .= '<p><a href="https://icecat.biz/en/menu/contacts/index.html" target="_blank">Upgrade To Full Icecat</a></p>';
+        $subscriptionLevel = $this->data->getUserType();
+        if (!empty($this->data->getUsername()) && !empty($this->data->getPassword()) ) {        
+            if ($subscriptionLevel != 'full') {
+                $html .= '<p><a href="https://icecat.biz/en/menu/contacts/index.html" target="_blank">Upgrade To Full Icecat</a></p>';
+            }
         }
         $html .= '<p><a href="https://icecat.biz/en/registration" target="_blank">Register with Icecat</a></p> <p><a href="https://icecat.biz/forgot" target="_blank">Forget Password</a></p> <p><a href="https://icecat.biz/mk/menu/contacts/index.html" target="_blank">Contact Us</a>';
         return $html;
