@@ -234,6 +234,7 @@ class IceCatUpdateProduct
             if (count($productImageData) > 0) {
                 $i = 0;
                 foreach ($productImageData as $imageData) {
+
                     $image = $imageData['Pic'];
 
                     $tmpDir = $this->getMediaDirTmpDir();
@@ -241,16 +242,14 @@ class IceCatUpdateProduct
                     /** create folder if it is not exists */
                     $newFileName = $tmpDir . $imageName;
                     /** read file from URL and copy it to the new destination */
-                    $result = $this->file->read($image, $newFileName);
+                    if ($userType == 'full' && !empty($contentToken)) {
+                        $result = $this->file->read($image. '?content_token=' .$contentToken, $newFileName);     
+                    } else {
+                        $result = $this->file->read($image, $newFileName);
+                    }
 
                     // Updating file permission of the uploaded file
                     $this->file->chmod($newFileName, 0777);
-                    if($userType == 'full' && !empty($contentToken))
-                    {
-                        $result = $this->file->read($image. '?content_token=' .$contentToken, $newFileName);     
-                    }else{
-                        $result = $this->file->read($image, $newFileName);
-                    }
 
                     if ($result) {
                         if ($i == 0) {
@@ -327,8 +326,7 @@ class IceCatUpdateProduct
                         $pdfName        = end($pdfNameArray);
                         /** create folder if it is not exists */
                         /** @var string $newFileName */
-                        $newFileName    = $destinationPath . baseName($pdf);
-                        $result         = $this->file->read($pdf, $newFileName);
+                        $newFileName    = $destinationPath . baseName($pdf);    
                         
                         if($userType == 'full' && !empty($contentToken)){
                             $result = $this->file->read($pdf.'?content_token='. $contentToken, $newFileName);
