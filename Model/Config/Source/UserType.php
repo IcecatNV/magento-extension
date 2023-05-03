@@ -47,8 +47,12 @@ class UserType implements ArrayInterface
     {
 		$subscriptionLevel = $this->data->getUserType();
         if(!empty($subscriptionLevel) && $subscriptionLevel == 'full'){
+            $this->setUserTypeValue(1);
+            $this->flushCache();
             return [['value' =>1 , 'label' => __('Yes')],['value' =>0 , 'label' => __('No')]];
         }else if(!empty($subscriptionLevel) && $subscriptionLevel == 'open'){
+            $this->setUserTypeValue(0);
+            $this->flushCache();
             return [['value' =>0 , 'label' => __('No')],['value' =>1 , 'label' => __('Yes')]];
         }else{
             return [['value' =>0 , 'label' => __('No')],['value' =>1 , 'label' => __('Yes')]];

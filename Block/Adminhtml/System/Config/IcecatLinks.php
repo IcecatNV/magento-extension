@@ -12,8 +12,6 @@ class IcecatLinks extends Field
 {
     private Data $data;
 
-    protected const ICECAT_XML_URL = 'https://data.icecat.biz/xml_s3/xml_server3.cgi?ean_upc=5397063929863;lang=en;output=productxml';
-
     /**
      * @param Context $context
      * @param Data $data
