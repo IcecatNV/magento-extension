@@ -11,7 +11,7 @@ class BrandsSelectionsDropdown implements ArrayInterface
     {
 
         return [
-            ['value' => 0, 'label' => __('Select All Brands')],
+            ['value' => 0, 'label' => __('All Brands')],
             ['value' => 1, 'label' => __('Select Specific Brands')],
         ];
     }
