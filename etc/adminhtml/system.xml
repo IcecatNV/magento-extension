@@ -104,6 +104,7 @@
                 <field id="multiple_brands" translate="label" type="multiselect" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Select Brand(s)</label>
                     <source_model>Icecat\DataFeed\Model\Config\Source\BrandMultiSelect</source_model>
+                    <validate>required-entry</validate>
                     <depends>
                         <field id="icecat_brands_selections">1</field>
                     </depends>
