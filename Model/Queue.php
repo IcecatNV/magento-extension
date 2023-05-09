@@ -20,6 +20,7 @@ use Magento\Store\Api\Data\GroupInterfaceFactory;
 use Magento\Store\Model\ResourceModel\Group as GroupResource;
 use Magento\Store\Api\StoreWebsiteRelationInterface;
 use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
+use Magento\Catalog\Model\Product\Attribute\Repository;
 
 class Queue
 {
@@ -116,6 +117,7 @@ class Queue
      * @param StoreRepositoryInterface $StoreRepositoryInterface
      * @param GroupInterfaceFactory $GroupInterfaceFactory
      * @param ConfigInterface $config
+     * @param Repository $attributeRepository
      */
     public function __construct(
         CollectionFactory $collectionFactory,
@@ -132,7 +134,8 @@ class Queue
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         StoreWebsiteRelationInterface $storeWebsiteRelation,
         StoreManagerInterface $storeManager,
-        ConfigInterface $config
+        ConfigInterface $config,
+        Repository $attributeRepository
     ) {
         $this->collectionFactory = $collectionFactory;
         $this->table = $resourceConnection->getTableName('icecat_datafeed_queue');
@@ -156,6 +159,7 @@ class Queue
         $this->videoTable = $resourceConnection->getTableName('catalog_product_entity_media_gallery_value_video');
         $this->columnExists = $resourceConnection->getConnection()->tableColumnExists('catalog_product_entity_media_gallery_value', 'entity_id');
         $this->config = $config;
+        $this->attributeRepository = $attributeRepository;
     }
 
     public function addJobToQueue($uniqueScheduledId)
@@ -551,8 +555,13 @@ class Queue
 
         if (!empty($product->getData($brandcode))) {
             $brandname=$product->getData($brandcode);
+            $attributeType = $this->attributeRepository->get($brandcode)->getFrontendInput();
+            if ($attributeType == 'select') {
+                $brandname  = $product->getAttributeText($brandcode);
+            }
         }
 
+        
         if (!empty($product->getData($product_att_code))) {
             $gtin=$product->getData($product_att_code);
         }

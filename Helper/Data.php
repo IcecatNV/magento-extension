@@ -8,6 +8,7 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Catalog\Model\Product\Attribute\Repository;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
@@ -63,18 +64,21 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param StoreManagerInterface $storeManager
      * @param Json $serialize
      * @param IcecatDatafeedQueueLog $icecatQueueLog
+     * @param Repository $attributeRepository
      */
     public function __construct(
         Context               $context,
         StoreManagerInterface $storeManager,
         Json                  $serialize,
         IcecatDatafeedQueueLog $icecatQueueLog,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        Repository $attributeRepository
     ) {
         $this->_storeManager = $storeManager;
         $this->serialize = $serialize;
         $this->_icecatQueueLog = $icecatQueueLog;
         $this->_scopeConfig = $scopeConfig;
+        $this->attributeRepository = $attributeRepository;
         parent::__construct($context);
     }
 
@@ -170,6 +174,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $brandCode = $this->getBrandCode();
                 $productCodeData = $product->getData($productCode);
                 $brandCodeData = $product->getData($brandCode);
+                
+                $attributeType = $this->attributeRepository->get($brandCode)->getFrontendInput();
+                if ($attributeType == 'select') {
+                    $brandCodeData  = $product->getAttributeText($brandCode);
+                }
 
                 if (!empty($productCodeData) && !empty($brandCodeData)) {
                     return '?UserName=' . $username . '&Language=' . $language . '&Brand=' . $brandCodeData . '&ProductCode=' . $productCodeData;
@@ -181,6 +190,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $productCodeData = $product->getData($productCode);
             $brandCodeData = $product->getData($brandCode);
 
+            $attributeType = $this->attributeRepository->get($brandCode)->getFrontendInput();
+            if ($attributeType == 'select') {
+                $brandCodeData  = $product->getAttributeText($brandCode);
+            }
+            
             if (!empty($productCodeData) && !empty($brandCodeData)) {
                 return '?UserName=' . $username . '&Language=' . $language . '&Brand=' . $brandCodeData . '&ProductCode=' . $productCodeData;
             } elseif (!empty($this->getGTINCode())) {

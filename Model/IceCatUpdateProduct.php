@@ -229,17 +229,18 @@ class IceCatUpdateProduct
             }
         }
 
+        
         if ($this->data->isImportImagesEnabled()) {
             $productImageData = $productData['Gallery'];
             if (count($productImageData) > 0) {
                 $i = 0;
-                $oldImageName = '';
+                $oldImageName = [];
                 foreach ($productImageData as $imageData) {
                     $image = $imageData['Pic'];
                     $tmpDir = $this->getMediaDirTmpDir();
                     $imageName = $product->getId() . '_' . $storeId . '_' . baseName($image);
-                    if ($imageName != $oldImageName) {
-                        $oldImageName = $imageName;
+                    if (in_array($imageName, $oldImageName)) {
+                        $oldImageName[] = $imageName;
                         /** create folder if it is not exists */
                         $newFileName = $tmpDir . $imageName;
                         /** read file from URL and copy it to the new destination */
@@ -317,7 +318,7 @@ class IceCatUpdateProduct
             $productMultiMediaData = $productData['Multimedia'];
 
             if (count($productMultiMediaData) > 0) {
-                $oldPDFName = '';
+                $oldPDFName = [];
                 $this->deletePdfList($storeId, $product->getId());
                 foreach ($productMultiMediaData as $multiMediaData) {
                     if (!$multiMediaData['IsVideo']) {
@@ -341,8 +342,8 @@ class IceCatUpdateProduct
                         }
                         $relativePath   = 'doc/' . $currentStore->getId() . '/' . $product->getId() . '/' . $pdfName;
                         
-                        if ($relativePath != $oldPDFName) {
-                            $oldPDFName = $relativePath;
+                        if (in_array($relativePath, $oldPDFName)) {
+                            $oldPDFName[] = $relativePath;
                             $pdfDetails     = [
                                 'product_id'        => $product->getId(),
                                 'attachment_file'   => $relativePath,
