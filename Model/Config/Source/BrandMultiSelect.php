@@ -43,15 +43,16 @@ class BrandMultiSelect implements ArrayInterface
 		       		}
 		       	}
 		   	} else {
+				$brandValueArray = [];
 				foreach ($collection as $key => $collections) {
 					$brandValueArray[$collections[$brandAttributeCode]] = $collections[$brandAttributeCode];
 				}
 		      	$i = 0;
-		       	foreach ($brandValueArray as $key => $brandValueArrays) {
-		       		$brandValueOption = ['value' => $brandValueArrays, 'label' => __($brandValueArrays)];
-		       		$brandValueFinalOption[$i] = $brandValueOption;
-		       		$i++;
-		       	}
+				foreach ($brandValueArray as $key => $brandValueArrays) {
+					$brandValueOption = ['value' => $brandValueArrays, 'label' => __($brandValueArrays)];
+					$brandValueFinalOption[$i] = $brandValueOption;
+					$i++;
+				}
 		   	}
 		   	return $brandValueFinalOption;
     	}
