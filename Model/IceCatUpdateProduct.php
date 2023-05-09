@@ -229,6 +229,7 @@ class IceCatUpdateProduct
             }
         }
 
+        
         if ($this->data->isImportImagesEnabled()) {
             $productImageData = $productData['Gallery'];
             if (count($productImageData) > 0) {

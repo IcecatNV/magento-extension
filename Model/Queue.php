@@ -561,6 +561,7 @@ class Queue
             }
         }
 
+        
         if (!empty($product->getData($product_att_code))) {
             $gtin=$product->getData($product_att_code);
         }

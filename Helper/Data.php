@@ -194,6 +194,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if ($attributeType == 'select') {
                 $brandCodeData  = $product->getAttributeText($brandCode);
             }
+            
             if (!empty($productCodeData) && !empty($brandCodeData)) {
                 return '?UserName=' . $username . '&Language=' . $language . '&Brand=' . $brandCodeData . '&ProductCode=' . $productCodeData;
             } elseif (!empty($this->getGTINCode())) {
