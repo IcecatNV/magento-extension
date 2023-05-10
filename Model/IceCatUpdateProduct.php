@@ -239,33 +239,35 @@ class IceCatUpdateProduct
                     $image = $imageData['Pic'];
                     $tmpDir = $this->getMediaDirTmpDir();
                     $imageName = $product->getId() . '_' . $storeId . '_' . baseName($image);
-                    if (in_array($imageName, $oldImageName)) {
+                    if (!in_array($imageName, $oldImageName)) { 
                         $oldImageName[] = $imageName;
-                        /** create folder if it is not exists */
-                        $newFileName = $tmpDir . $imageName;
-                        /** read file from URL and copy it to the new destination */
-                        if ($userType == 'full' && !empty($contentToken)) {
-                            $result = $this->file->read($image. '?content_token=' .$contentToken, $newFileName);     
-                        } else {
-                            $result = $this->file->read($image, $newFileName);
-                        }
-    
-                        // Updating file permission of the uploaded file
-                        $this->file->chmod($newFileName, 0777);
-                        if ($result) {
-                            try{
-                                if ($i == 0) {
-                                    $product->addImageToMediaGallery($newFileName, ['image', 'small_image', 'thumbnail'], false, false);
-                                } else {
-                                    $product->addImageToMediaGallery($newFileName, [], false, false);
-                                }
-                                $i++;
-                            } catch (\Exception $e) {
-                                $this->logger->error('Image issue: ' . $e->getMessage());
-                            }
-                        }
-                        $globalMediaArray['image'][$storeId][] = $imageName;
+                    } else {
+                        continue;
                     }
+                    /** create folder if it is not exists */
+                    $newFileName = $tmpDir . $imageName;
+                    /** read file from URL and copy it to the new destination */
+                    if ($userType == 'full' && !empty($contentToken)) {
+                        $result = $this->file->read($image. '?content_token=' .$contentToken, $newFileName);     
+                    } else {
+                        $result = $this->file->read($image, $newFileName);
+                    }
+
+                    // Updating file permission of the uploaded file
+                    $this->file->chmod($newFileName, 0777);
+                    if ($result) {
+                        try{
+                            if ($i == 0) {
+                                $product->addImageToMediaGallery($newFileName, ['image', 'small_image', 'thumbnail'], false, false);
+                            } else {
+                                $product->addImageToMediaGallery($newFileName, [], false, false);
+                            }
+                            $i++;
+                        } catch (\Exception $e) {
+                            $this->logger->error('Image issue: ' . $e->getMessage());
+                        }
+                    }
+                    $globalMediaArray['image'][$storeId][] = $imageName;
                 }
             }
         }
