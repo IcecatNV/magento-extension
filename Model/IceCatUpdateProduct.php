@@ -318,9 +318,7 @@ class IceCatUpdateProduct
 
         if ($this->data->isImportPdfEnabled()) {
             $productMultiMediaData = $productData['Multimedia'];
-
             if (count($productMultiMediaData) > 0) {
-                $oldPDFName = [];
                 $this->deletePdfList($storeId, $product->getId());
                 foreach ($productMultiMediaData as $multiMediaData) {
                     if (!$multiMediaData['IsVideo']) {
@@ -343,17 +341,13 @@ class IceCatUpdateProduct
                             $result = $this->file->read($pdf, $newFileName);
                         }
                         $relativePath   = 'doc/' . $currentStore->getId() . '/' . $product->getId() . '/' . $pdfName;
-                        
-                        if (in_array($relativePath, $oldPDFName)) {
-                            $oldPDFName[] = $relativePath;
-                            $pdfDetails     = [
-                                'product_id'        => $product->getId(),
-                                'attachment_file'   => $relativePath,
-                                'store_id'          => $storeId,
-                                'title'             => $multiMediaData['Description']
-                            ];
-                            $this->createPdfAttribute($pdfDetails);
-                        }
+                        $pdfDetails     = [
+                            'product_id'        => $product->getId(),
+                            'attachment_file'   => $relativePath,
+                            'store_id'          => $storeId,
+                            'title'             => $multiMediaData['Description']
+                        ];
+                        $this->createPdfAttribute($pdfDetails);
                     }
                 }
             }
