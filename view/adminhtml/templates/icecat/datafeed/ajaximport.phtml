@@ -1,18 +1,37 @@
+<?php
+
+$dataFeedHelper = $this->helper('\Icecat\DataFeed\Helper\Data');
+$response = $dataFeedHelper->getUserSessionId();
+$tokenValidate = $dataFeedHelper->validateToken();
+
+$tokenResponse =  json_decode($tokenValidate['response'], true);
+$result = '';
+if (!empty($response) && array_key_exists("Code",$response)) {
+    $result = $response['Message'];
+} else if(!empty($tokenValidate) && $tokenValidate['httpcode'] == "400") {
+    $result = $tokenResponse['Message'];
+} ?>
 <script type="text/javascript">
-    function import_prod_info(){
-        let text = "You are about to update all the products. Do you wish to continue?";
-        if (confirm(text) == true) {
-            new Ajax.Request('<?php echo \Magento\Framework\App\ObjectManager::getInstance()->get('\Magento\Backend\Model\UrlInterface')->getUrl('icecat/data/importproductinfo'); ?>', {
-                method:     'get',
-                onSuccess: function(transport) {
-                    var import_info = JSON.parse(transport.responseText);
-                    if (import_info.success) {
-                        alert(import_info.message);
+    var result = "<?= $result ?>";
+    if (result) {
+        function import_prod_info(){
+            alert(result);
+        }
+    } else {
+        function import_prod_info(){
+            let text = "You are about to update all the products. Do you wish to continue?";
+            if (confirm(text) == true) {
+                new Ajax.Request('<?php echo \Magento\Framework\App\ObjectManager::getInstance()->get('\Magento\Backend\Model\UrlInterface')->getUrl('icecat/data/importproductinfo'); ?>', {
+                    method:     'get',
+                    onSuccess: function(transport) {
+                        var import_info = JSON.parse(transport.responseText);
+                        if (import_info.success) {
+                            alert(import_info.message);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }
-
 </script>
 <?php echo $block->getButtonHtml(); ?>

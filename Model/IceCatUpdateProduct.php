@@ -97,10 +97,14 @@ class IceCatUpdateProduct
             mkdir($tmpMediaDir . "/tmp", 0755, true);
         }
 
+        $contentToken = $this->data->getContentToken();
+        $userType = $this->data->getUserType();
+
         $product->setStoreId($storeId);
         $product->setData('icecat_icecat_id', $response['data']['GeneralInfo']['IcecatId']);
 
         $attributeForMapping = $this->data->getProductAttributes();
+        
         $productData = $response['data'];
         if (!empty($attributeForMapping)) {
             $attributeArray = [];
@@ -135,10 +139,18 @@ class IceCatUpdateProduct
                         if ($flag === 'LEFT'):
                             $reasonsHtml .= ' <div class = "content-block"> <h5><b>' . $reasons['Title'] . '</b></h5>';
                             $reasonsHtml .= '<span>' . $reasons['Value'] . '</span></div>';
-                            $reasonsHtml .= ' <div class="image-block"><img class = "image-left" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /></div>';
+                            if ($userType == 'full' && !empty($contentToken)) {
+                                $reasonsHtml .= ' <div class="image-block"><img class = "image-left" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '?content_token='.$contentToken.'" /></div>';
+                            } else {
+                                $reasonsHtml .= ' <div class="image-block"><img class = "image-left" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /></div>';
+                            }
                             $flag = 'RIGHT';
                         else:
-                            $reasonsHtml .= '<div class = "image-block">  <img class = "image-right" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /> </div>';
+                            if ($userType == 'full' && !empty($contentToken)) {
+                                $reasonsHtml .= '<div class = "image-block">  <img class = "image-right" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '?content_token='. $contentToken.'" /> </div>';
+                            } else {
+                                $reasonsHtml .= '<div class = "image-block">  <img class = "image-right" alt="IMAGE-NOT-AVAILABLE" src="' . $reasons['HighPic'] . '" /> </div>';
+                            }
                             $reasonsHtml .= '<div class = "content-block"><h5><b>' . $reasons['Title'] . '</b></h5>';
                             $reasonsHtml .= '<span>' . $reasons['Value'] . '</span></div>';
 
@@ -199,8 +211,15 @@ class IceCatUpdateProduct
                     $html = "";
                     if ($data['URL'] != "") {
                         $pathinfo = pathinfo($data['URL']);
-                        $html = file_get_contents($data['URL']);
+                        if ($userType == 'full' && !empty($contentToken)) {
+                            $html = file_get_contents($data['URL'].'?content_token='. $contentToken);
+                        }else{
+                            $html = file_get_contents($data['URL']);
+                        }
                         $html = preg_replace("/src=\"/", 'src="' . $pathinfo['dirname'] . '/', $html);
+                        if ($userType == 'full' && !empty($contentToken)) {
+                            $html = preg_replace("/\" alt=\"/", '?content_token='. $contentToken .'" alt="', $html);
+                        }
                         $html = preg_replace("/href=\"/", 'href="' . $pathinfo['dirname'] . '/', $html);
                     }
                 }
@@ -210,30 +229,43 @@ class IceCatUpdateProduct
             }
         }
 
+        
         if ($this->data->isImportImagesEnabled()) {
             $productImageData = $productData['Gallery'];
             if (count($productImageData) > 0) {
                 $i = 0;
+                $oldImageName = [];
                 foreach ($productImageData as $imageData) {
                     $image = $imageData['Pic'];
-
                     $tmpDir = $this->getMediaDirTmpDir();
                     $imageName = $product->getId() . '_' . $storeId . '_' . baseName($image);
+                    if (!in_array($imageName, $oldImageName)) { 
+                        $oldImageName[] = $imageName;
+                    } else {
+                        continue;
+                    }
                     /** create folder if it is not exists */
                     $newFileName = $tmpDir . $imageName;
                     /** read file from URL and copy it to the new destination */
-                    $result = $this->file->read($image, $newFileName);
+                    if ($userType == 'full' && !empty($contentToken)) {
+                        $result = $this->file->read($image. '?content_token=' .$contentToken, $newFileName);     
+                    } else {
+                        $result = $this->file->read($image, $newFileName);
+                    }
 
                     // Updating file permission of the uploaded file
                     $this->file->chmod($newFileName, 0777);
-                    
                     if ($result) {
-                        if ($i == 0) {
-                            $product->addImageToMediaGallery($newFileName, ['image', 'small_image', 'thumbnail'], false, false);
-                        } else {
-                            $product->addImageToMediaGallery($newFileName, [], false, false);
+                        try{
+                            if ($i == 0) {
+                                $product->addImageToMediaGallery($newFileName, ['image', 'small_image', 'thumbnail'], false, false);
+                            } else {
+                                $product->addImageToMediaGallery($newFileName, [], false, false);
+                            }
+                            $i++;
+                        } catch (\Exception $e) {
+                            $this->logger->error('Image issue: ' . $e->getMessage());
                         }
-                        $i++;
                     }
                     $globalMediaArray['image'][$storeId][] = $imageName;
                 }
@@ -286,7 +318,6 @@ class IceCatUpdateProduct
 
         if ($this->data->isImportPdfEnabled()) {
             $productMultiMediaData = $productData['Multimedia'];
-
             if (count($productMultiMediaData) > 0) {
                 $this->deletePdfList($storeId, $product->getId());
                 foreach ($productMultiMediaData as $multiMediaData) {
@@ -302,8 +333,13 @@ class IceCatUpdateProduct
                         $pdfName        = end($pdfNameArray);
                         /** create folder if it is not exists */
                         /** @var string $newFileName */
-                        $newFileName    = $destinationPath . baseName($pdf);
-                        $result         = $this->file->read($pdf, $newFileName);
+                        $newFileName    = $destinationPath . baseName($pdf);    
+                        
+                        if($userType == 'full' && !empty($contentToken)){
+                            $result = $this->file->read($pdf.'?content_token='. $contentToken, $newFileName);
+                        }else{
+                            $result = $this->file->read($pdf, $newFileName);
+                        }
                         $relativePath   = 'doc/' . $currentStore->getId() . '/' . $product->getId() . '/' . $pdfName;
                         $pdfDetails     = [
                             'product_id'        => $product->getId(),

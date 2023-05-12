@@ -8,6 +8,7 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Catalog\Model\Product\Attribute\Repository;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
@@ -27,6 +28,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected const XML_PATH_ICECAT_DATAFEED_AUTH_USERNAME = 'datafeed/authentication/username';
     protected const XML_PATH_ICECAT_DATAFEED_AUTH_PASSWORD = 'datafeed/authentication/password';
     protected const XML_PATH_ICECAT_DATAFEED_API_ACCESS_TOKEN = 'datafeed/authentication/access_token';
+    protected const XML_PATH_ICECAT_DATAFEED_API_CONTENT_TOKEN = 'datafeed/authentication/content_token';
+    protected const XML_PATH_ICECAT_DATAFEED_API_APP_KEY = 'datafeed/authentication/app_key';
 
     protected const XML_PATH_ICECAT_STORE_CONFIGURATION = 'datafeed/icecat_store_config/stores';
 
@@ -61,18 +64,21 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param StoreManagerInterface $storeManager
      * @param Json $serialize
      * @param IcecatDatafeedQueueLog $icecatQueueLog
+     * @param Repository $attributeRepository
      */
     public function __construct(
         Context               $context,
         StoreManagerInterface $storeManager,
         Json                  $serialize,
         IcecatDatafeedQueueLog $icecatQueueLog,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        Repository $attributeRepository
     ) {
         $this->_storeManager = $storeManager;
         $this->serialize = $serialize;
         $this->_icecatQueueLog = $icecatQueueLog;
         $this->_scopeConfig = $scopeConfig;
+        $this->attributeRepository = $attributeRepository;
         parent::__construct($context);
     }
 
@@ -119,6 +125,22 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * @return mixed
+     */
+    public function getContentToken()
+    {
+        return $this->scopeConfig->getValue(self::XML_PATH_ICECAT_DATAFEED_API_CONTENT_TOKEN);
+    }
+    
+	/**
+     * @return mixed
+     */
+    public function getAppKey()
+    {
+        return $this->scopeConfig->getValue(self::XML_PATH_ICECAT_DATAFEED_API_APP_KEY);
+    }
+
+    /**
      * @return array|bool|float|int|mixed|string|void|null
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
@@ -152,6 +174,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $brandCode = $this->getBrandCode();
                 $productCodeData = $product->getData($productCode);
                 $brandCodeData = $product->getData($brandCode);
+                
+                $attributeType = $this->attributeRepository->get($brandCode)->getFrontendInput();
+                if ($attributeType == 'select') {
+                    $brandCodeData  = $product->getAttributeText($brandCode);
+                }
 
                 if (!empty($productCodeData) && !empty($brandCodeData)) {
                     return '?UserName=' . $username . '&Language=' . $language . '&Brand=' . $brandCodeData . '&ProductCode=' . $productCodeData;
@@ -163,6 +190,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $productCodeData = $product->getData($productCode);
             $brandCodeData = $product->getData($brandCode);
 
+            $attributeType = $this->attributeRepository->get($brandCode)->getFrontendInput();
+            if ($attributeType == 'select') {
+                $brandCodeData  = $product->getAttributeText($brandCode);
+            }
+            
             if (!empty($productCodeData) && !empty($brandCodeData)) {
                 return '?UserName=' . $username . '&Language=' . $language . '&Brand=' . $brandCodeData . '&ProductCode=' . $productCodeData;
             } elseif (!empty($this->getGTINCode())) {
@@ -327,5 +359,83 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'response' => $response,
             'httpcode' => $httpcode
         ];
+    }
+
+    public function getUserSessionId()
+    {
+        $uid= array( 
+            'Login' => $this->getUsername(),
+            'Password' => $this->getPassword(),
+            'Session' => 'Rest'
+        );
+        $postData = json_encode($uid);
+
+        if ($this->getIsModuleEnabled()) {
+            try {
+                if (!empty($this->getUsername()) && !empty($this->getPassword()) ) {
+                    $curl = curl_init();
+                    curl_setopt_array($curl, array(
+                        CURLOPT_URL => 'https://bo.icecat.biz/restful/v3/Session',
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_ENCODING => '',
+                        CURLOPT_MAXREDIRS => 10,
+                        CURLOPT_TIMEOUT => 0,
+                        CURLOPT_FOLLOWLOCATION => true,
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST => 'POST',
+                        CURLOPT_POSTFIELDS => $postData,
+                        CURLOPT_HTTPHEADER => array(
+                            'Content-Type: application/json'
+                        ),
+                    ));
+                    $response = json_decode(curl_exec($curl),true);
+                    curl_close($curl);
+                } else {
+                    $responseMessage = __('Please enter username and password');
+                    $response = ['Code'=> 400 ,'Error' => 'Bad Request','Message'=> $responseMessage];
+                }
+            } catch (\Exception $e) {
+                $responseMessage = __('Something went wrong');
+                $response = ['Code'=> 400 ,'Error' => 'Bad Request','Message'=> $responseMessage];
+            }
+        }else{
+            $responseMessage = __('Please Enable Module ');
+            $response = ['Code'=> 400 ,'Error' => 'Bad Request','Message'=> $responseMessage];
+        }
+        
+        return $response;
+    }
+
+    public function getUserType()
+    {
+        $usrSessionId = $this->getUserSessionId();
+        $usertype = 0;
+        if (!empty($usrSessionId) && !empty($usrSessionId['Data'])) {
+            $sessionId = $usrSessionId['Data']['SessionId'];
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://icecat.biz/rest/user-profile?AccessKey=' . $sessionId,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+                CURLOPT_HTTPHEADER => array(
+                    'Cookie: ULocation=WW%7Cen'
+                ),
+            ));
+            $response = json_decode(curl_exec($curl),true);
+            $usertype = $response['Data']['SubscriptionLevel'];
+            curl_close($curl); // full or open
+            if ($usertype == 1 || $usertype == 4){
+                return $usertype = 'full';
+            } else if($usertype == 5 || $usertype == 6){
+                return $usertype = 'open';
+            }           
+        } else{
+            return $usertype;
+        }
     }
 }

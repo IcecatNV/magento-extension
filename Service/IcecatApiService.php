@@ -68,6 +68,13 @@ class IcecatApiService
             'base_uri' => self::API_REQUEST_URI
         ]]);
 
+        $userType = $this->data->getUserType();
+        
+        if($userType == 'full' && !empty($this->data->getAppKey())) {
+            $uriEndpoint = $uriEndpoint . '&app_key=' . $this->data->getAppKey();
+        }
+        $uriEndpoint = $uriEndpoint . '&PlatformName=Magento2OpensourceExtension&PlatformVersion=V2';
+
         $params['headers'] = [
             'api-token' => $this->data->getAccessToken()
         ];

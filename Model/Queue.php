@@ -20,6 +20,7 @@ use Magento\Store\Api\Data\GroupInterfaceFactory;
 use Magento\Store\Model\ResourceModel\Group as GroupResource;
 use Magento\Store\Api\StoreWebsiteRelationInterface;
 use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
+use Magento\Catalog\Model\Product\Attribute\Repository;
 
 class Queue
 {
@@ -116,6 +117,7 @@ class Queue
      * @param StoreRepositoryInterface $StoreRepositoryInterface
      * @param GroupInterfaceFactory $GroupInterfaceFactory
      * @param ConfigInterface $config
+     * @param Repository $attributeRepository
      */
     public function __construct(
         CollectionFactory $collectionFactory,
@@ -133,6 +135,7 @@ class Queue
         StoreWebsiteRelationInterface $storeWebsiteRelation,
         StoreManagerInterface $storeManager,
         ConfigInterface $config,
+        Repository $attributeRepository
     ) {
         $this->collectionFactory = $collectionFactory;
         $this->table = $resourceConnection->getTableName('icecat_datafeed_queue');
@@ -156,17 +159,28 @@ class Queue
         $this->videoTable = $resourceConnection->getTableName('catalog_product_entity_media_gallery_value_video');
         $this->columnExists = $resourceConnection->getConnection()->tableColumnExists('catalog_product_entity_media_gallery_value', 'entity_id');
         $this->config = $config;
+        $this->attributeRepository = $attributeRepository;
     }
 
     public function addJobToQueue($uniqueScheduledId)
     {
         $authResponse = $this->data->validateToken();
-        if($authResponse['httpcode'] != "400")
-        {
+        if($authResponse['httpcode'] != "400") {
             $productCollection = $this->getProductCollections();
             $productCollection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS);
             $productCollection->getSelect()->columns('entity_id');
             $collection1Ids = $productCollection->getAllIds();
+             //Brand Filter Code - START
+            $isBrandsFilterEnabled = $this->_scopeConfig->getValue('datafeed/icecat_brands/icecat_brands_selections', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            if ($isBrandsFilterEnabled == 1) {
+                $brandAttribute = $this->_scopeConfig->getValue('datafeed/product_brand_fetch_type/brand', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+                $selectedBrands = $this->_scopeConfig->getValue('datafeed/icecat_brands/multiple_brands', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+                $selectedBrandsArr = explode(",",$selectedBrands);
+                $collection = $productCollection->addAttributeToSelect($brandAttribute)
+                    ->addFieldToFilter($brandAttribute,['in' => $selectedBrandsArr]); 
+                $collection1Ids = array_column($collection->getData(), 'entity_id');
+            }
+            //Brand Filter Code - END
             sort($collection1Ids);
             $chunkedArray = array_chunk($collection1Ids, 50);
             foreach ($chunkedArray as $productids) {
@@ -180,9 +194,7 @@ class Queue
             }
 
             return true;
-        }
-        else
-        {
+        } else {
             echo "<script>alert('API is not Valid');</script>";
         }
     }
@@ -199,6 +211,17 @@ class Queue
         $productCollection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS);
         $productCollection->getSelect()->columns('entity_id');
         $collection1Ids = $productCollection->getAllIds();
+         //Brand Filter Code - START
+        $isBrandsFilterEnabled = $this->_scopeConfig->getValue('datafeed/icecat_brands/icecat_brands_selections', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        if ($isBrandsFilterEnabled == 1) {
+            $brandAttribute = $this->_scopeConfig->getValue('datafeed/product_brand_fetch_type/brand', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            $selectedBrands = $this->_scopeConfig->getValue('datafeed/icecat_brands/multiple_brands', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            $selectedBrandsArr = explode(",",$selectedBrands);
+            $collection = $productCollection->addAttributeToSelect($brandAttribute)
+                ->addFieldToFilter($brandAttribute,['in' => $selectedBrandsArr]); 
+            $collection1Ids = array_column($collection->getData(), 'entity_id');
+        }
+        //Brand Filter Code - END
         sort($collection1Ids);
         $chunkedArray = array_chunk($collection1Ids, 50);
         foreach ($chunkedArray as $productids) {
@@ -321,24 +344,6 @@ class Queue
                         $globalImageArray = [];
                         $globalVideoArray = [];
                         $responseArray = [];
-                        foreach ($storeArrayForImage as $store) {
-                            if ($this->data->isImportImagesEnabled()) {
-                                $product = $this->productRepository->getById($productId, false, $store);
-                                $images = $product->getMediaGalleryImages();
-                                $mediaTypeArray = ['image', 'small_image', 'thumbnail'];
-                                $this->processor->clearMediaAttribute($product, $mediaTypeArray);
-                                $existingMediaGalleryEntries = $product->getMediaGalleryEntries();
-                                foreach ($existingMediaGalleryEntries as $key => $entry) {
-                                    unset($existingMediaGalleryEntries[$key]);
-                                }
-                                $product->setMediaGalleryEntries($existingMediaGalleryEntries);
-                                foreach ($images as $child) {
-                                    $this->processor->removeImage($product, $child->getFile());
-                                }
-                                $this->productRepository->save($product);
-                            }
-                        }
-
                         // Check for icecat root category from all root categories, create it if not there
                         $rootCats = [];
                         if ($this->data->isCategoryImportEnabled()) {
@@ -422,6 +427,27 @@ class Queue
                                     $errorProductIds[]  = $productId;
                                     $errorLog['Product ID-' . $productId] = $errorMessage;
                                 } else {
+                                    if ($this->data->isImportImagesEnabled()) {	
+                                        $productData = $response['data'];	
+                                        $productImageData = $productData['Gallery'];	
+                                        $images = $product->getMediaGalleryImages();	
+                                        $mediaTypeArray = ['image', 'small_image', 'thumbnail'];	
+                                        $this->processor->clearMediaAttribute($product, $mediaTypeArray);	
+                                        $iceCatImages = [];
+                                        foreach ($productImageData as $imageData) {
+                                            $parsedUrl = parse_url($imageData['Pic']);
+                                            $pathInfo = pathinfo($parsedUrl['path']);
+                                            $imageName = $productId . '_' . $store . '_' .$pathInfo['filename'];                                    
+                                            foreach ($images as $child) {
+                                                if (strpos($child->getFile(), $imageName) !== false) {
+                                                    $this->processor->removeImage($product, $child->getFile());
+                                                }elseif(strpos($child->getFile(), '//'.$productId . '_' . $store.'_') !== false ){
+                                                    $this->processor->removeImage($product, $child->getFile());
+                                                }
+                                            } 
+                                        } 
+                                        $this->productRepository->save($product);                                
+                                    }	
                                     $globalMediaArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalMediaArray);
                                     $globalImageArray = array_key_exists('image', $globalMediaArray) ? $globalMediaArray['image'] : [];
                                     $globalVideoArray = array_key_exists('video', $globalMediaArray) ? $globalMediaArray['video'] : [];
@@ -532,8 +558,13 @@ class Queue
 
         if (!empty($product->getData($brandcode))) {
             $brandname=$product->getData($brandcode);
+            $attributeType = $this->attributeRepository->get($brandcode)->getFrontendInput();
+            if ($attributeType == 'select') {
+                $brandname  = $product->getAttributeText($brandcode);
+            }
         }
 
+        
         if (!empty($product->getData($product_att_code))) {
             $gtin=$product->getData($product_att_code);
         }
