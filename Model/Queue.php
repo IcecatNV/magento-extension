@@ -344,24 +344,6 @@ class Queue
                         $globalImageArray = [];
                         $globalVideoArray = [];
                         $responseArray = [];
-                        foreach ($storeArrayForImage as $store) {
-                            if ($this->data->isImportImagesEnabled()) {
-                                $product = $this->productRepository->getById($productId, false, $store);
-                                $images = $product->getMediaGalleryImages();
-                                $mediaTypeArray = ['image', 'small_image', 'thumbnail'];
-                                $this->processor->clearMediaAttribute($product, $mediaTypeArray);
-                                $existingMediaGalleryEntries = $product->getMediaGalleryEntries();
-                                foreach ($existingMediaGalleryEntries as $key => $entry) {
-                                    unset($existingMediaGalleryEntries[$key]);
-                                }
-                                $product->setMediaGalleryEntries($existingMediaGalleryEntries);
-                                foreach ($images as $child) {
-                                    $this->processor->removeImage($product, $child->getFile());
-                                }
-                                $this->productRepository->save($product);
-                            }
-                        }
-
                         // Check for icecat root category from all root categories, create it if not there
                         $rootCats = [];
                         if ($this->data->isCategoryImportEnabled()) {
@@ -445,6 +427,27 @@ class Queue
                                     $errorProductIds[]  = $productId;
                                     $errorLog['Product ID-' . $productId] = $errorMessage;
                                 } else {
+                                    if ($this->data->isImportImagesEnabled()) {	
+                                        $productData = $response['data'];	
+                                        $productImageData = $productData['Gallery'];	
+                                        $images = $product->getMediaGalleryImages();	
+                                        $mediaTypeArray = ['image', 'small_image', 'thumbnail'];	
+                                        $this->processor->clearMediaAttribute($product, $mediaTypeArray);	
+                                        $iceCatImages = [];
+                                        foreach ($productImageData as $imageData) {
+                                            $parsedUrl = parse_url($imageData['Pic']);
+                                            $pathInfo = pathinfo($parsedUrl['path']);
+                                            $imageName = $productId . '_' . $store . '_' .$pathInfo['filename'];                                    
+                                            foreach ($images as $child) {
+                                                if (strpos($child->getFile(), $imageName) !== false) {
+                                                    $this->processor->removeImage($product, $child->getFile());
+                                                }elseif(strpos($child->getFile(), '//'.$productId . '_' . $store.'_') !== false ){
+                                                    $this->processor->removeImage($product, $child->getFile());
+                                                }
+                                            } 
+                                        } 
+                                        $this->productRepository->save($product);                                
+                                    }	
                                     $globalMediaArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalMediaArray);
                                     $globalImageArray = array_key_exists('image', $globalMediaArray) ? $globalMediaArray['image'] : [];
                                     $globalVideoArray = array_key_exists('video', $globalMediaArray) ? $globalMediaArray['video'] : [];
