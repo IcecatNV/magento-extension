@@ -2,8 +2,15 @@
 
 The open-source Icecat extension gives the capability to enrich Magento 2 product catalog from the open and free Icecat rich product catalog.
 
-Installation Prerequisites: Magento Open Source 2.4.5
+**New features in version 2.0.0**
+- Unlock the Full Icecat users
+- Filter and Bulk Import Products by Specific Brands
 
+[Click here to see full details for version 2.0.0](./doc/v2.md)
+
+**Icecat Magento-Extension Version 1.0.0**
+
+Installation Prerequisites: Magento Open Source 2.4.5
 
 **Installation**
 
@@ -32,12 +39,6 @@ php bin/magento cache:flush
 - The system.log file is logged with the details when the product is not assigned to any of the store(s). Sample log
 
     ![img1](./doc/images/image14.png)
-
-**New features in v2.0.0**
-- Unlock the Full Icecat users
-- Filter and Bulk Import Products by Specific Brands
-
-[Click here to see full details for v2.0.0](./doc/v2.md)
 
 - The Icecat Extension will be added in the default Magento store configuration section.
 
