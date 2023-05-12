@@ -31,6 +31,12 @@ To install this extension, use the following commands:
 
     ![img1](./doc/images/image14.png)
 
+**New features in v2.0.0**
+- Unlock the Full Icecat users
+- Filter and Bulk Import Products by Specific Brands
+
+[Click here to see full details for v2.0.0](./doc/v2.md)
+
 - The Icecat Extension will be added in the default Magento store configuration section.
 
     ![img1](./doc/images/image16.png)
