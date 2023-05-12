@@ -8,13 +8,15 @@ Installation Prerequisites: Magento Open Source 2.4.5
 **Installation**
 
 To install this extension, use the following commands:
-- composer require icecat/magento2-extension
-- php bin/magento module:enable Icecat_Datafeed
-- php bin/magento setup:upgrade
-- php bin/magento setup:static-content:deploy
-- php bin/magento setup:di:compile
-- php bin/magento indexer:reindex
-- php bin/magento cache:flush
+~~~~~~~~~~~~~~~~~~~~~
+composer require icecat/magento2-extension
+php bin/magento module:enable Icecat_Datafeed
+php bin/magento setup:upgrade
+php bin/magento setup:static-content:deploy
+php bin/magento setup:di:compile
+php bin/magento indexer:reindex
+php bin/magento cache:flush
+~~~~~~~~~~~~~~~~~~~~~
 
 **Note(s):**
 
