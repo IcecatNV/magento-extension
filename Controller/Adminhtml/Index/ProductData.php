@@ -214,30 +214,6 @@ class ProductData extends Action
                         if (!empty($response) && !empty($response['Code'])) {
                             $errorMessage = $response['Message'];
                         } else {
-                            // Store wise Delete Images Start 
-                            if ($this->data->isImportImagesEnabled()) {	
-                                $productData = $response['data'];	
-                                $productImageData = $productData['Gallery'];	
-                                $images = $product->getMediaGalleryImages();	
-                                $mediaTypeArray = ['image', 'small_image', 'thumbnail'];	
-                                $this->processor->clearMediaAttribute($product, $mediaTypeArray);	
-                                $iceCatImages = [];
-                                foreach ($productImageData as $imageData) {
-                                    $parsedUrl = parse_url($imageData['Pic']);
-                                    $pathInfo = pathinfo($parsedUrl['path']);
-                                    $imageName = $productId . '_' . $store . '_' .$pathInfo['filename'];                                    
-                                    foreach ($images as $child) {
-                                        if (strpos($child->getFile(), $imageName) !== false) {
-                                            $this->processor->removeImage($product, $child->getFile());
-                                        }elseif(strpos($child->getFile(), '//'.$productId . '_' . $store.'_') !== false ){
-                                            $this->processor->removeImage($product, $child->getFile());
-                                        }
-                                    } 
-                                } 
-                                $this->productRepository->save($product);                                
-                            }	
-                            // Store wise Delete Images Start 
-
                             $globalMediaArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalMediaArray);
                             $globalImageArray = array_key_exists('image', $globalMediaArray)?$globalMediaArray['image']:[];
                             $globalVideoArray = array_key_exists('video', $globalMediaArray)?$globalMediaArray['video']:[];

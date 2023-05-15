@@ -344,6 +344,7 @@ class Queue
                         $globalImageArray = [];
                         $globalVideoArray = [];
                         $responseArray = [];
+
                         // Check for icecat root category from all root categories, create it if not there
                         $rootCats = [];
                         if ($this->data->isCategoryImportEnabled()) {
@@ -419,45 +420,23 @@ class Queue
                             $product = $this->productRepository->getById($productId, false, $store);
                             $language = $this->data->getStoreLanguage($store);
                             $icecatUri = $this->data->getIcecatUri($product, $language);
-                            if ($icecatUri) {
+                            if ($icecatUri) {                                
                                 $response = $this->icecatApiService->execute($icecatUri);
                                 $responseArray[$store] = $response;
                                 if (!empty($response) && !empty($response['Code'])) {
                                     $errorMessage       = $this->errorMessageResponse($response, $product);
                                     $errorProductIds[]  = $productId;
                                     $errorLog['Product ID-' . $productId] = $errorMessage;
-                                } else {
-                                    if ($this->data->isImportImagesEnabled()) {	
-                                        $productData = $response['data'];	
-                                        $productImageData = $productData['Gallery'];	
-                                        $images = $product->getMediaGalleryImages();	
-                                        $mediaTypeArray = ['image', 'small_image', 'thumbnail'];	
-                                        $this->processor->clearMediaAttribute($product, $mediaTypeArray);	
-                                        $iceCatImages = [];
-                                        foreach ($productImageData as $imageData) {
-                                            $parsedUrl = parse_url($imageData['Pic']);
-                                            $pathInfo = pathinfo($parsedUrl['path']);
-                                            $imageName = $productId . '_' . $store . '_' .$pathInfo['filename'];                                    
-                                            foreach ($images as $child) {
-                                                if (strpos($child->getFile(), $imageName) !== false) {
-                                                    $this->processor->removeImage($product, $child->getFile());
-                                                }elseif(strpos($child->getFile(), '//'.$productId . '_' . $store.'_') !== false ){
-                                                    $this->processor->removeImage($product, $child->getFile());
-                                                }
-                                            } 
-                                        } 
-                                        $this->productRepository->save($product);                                
-                                    }	
-                                    $globalMediaArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalMediaArray);
+                                } else {                                    
+                                    $globalMediaArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalMediaArray);                                    
                                     $globalImageArray = array_key_exists('image', $globalMediaArray) ? $globalMediaArray['image'] : [];
                                     $globalVideoArray = array_key_exists('video', $globalMediaArray) ? $globalMediaArray['video'] : [];
-                                    $successProducts[] = $productId;
+                                    $successProducts[] = $productId;                                    
                                 }
-                            } else {
+                            } else {                                
                                 $productWithOutGtinAndProductCodeAndBrandCode[] = $productId;
                             }
-                        }
-
+                        }                        
                         if ($this->columnExists === false) {
                             $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id where A.row_id=" . $productId . " and B.media_type='image'";
                         } else {
@@ -507,6 +486,7 @@ class Queue
                             }
                         }
                     }
+
                     $iceCatLogArray['duration'] = time() - $started;
                     $iceCatLogArray['ended'] = date('Y-m-d H:i:s');
                     $iceCatLogArray['imported_record'] = count(array_unique($successProducts));
