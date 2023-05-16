@@ -235,15 +235,29 @@ class IceCatUpdateProduct
             if (count($productImageData) > 0) {
                 $i = 0;
                 $oldImageName = [];
+                $productId = $product->getId();
+                $images = $product->getMediaGalleryImages();
                 foreach ($productImageData as $imageData) {
                     $image = $imageData['Pic'];
                     $tmpDir = $this->getMediaDirTmpDir();
                     $imageName = $product->getId() . '_' . $storeId . '_' . baseName($image);
+                    $imageNameWithoutExtension = substr($imageName, 0, strrpos($imageName, '.'));
                     if (!in_array($imageName, $oldImageName)) { 
                         $oldImageName[] = $imageName;
                     } else {
                         continue;
                     }
+                    $imgFlag = 0; 
+                    foreach ($images as $child) {                        
+                        if (strpos($child->getFile(), $imageNameWithoutExtension) !== false) {
+                            $imgFlag = 1;                            
+                            continue;
+                        } 
+                    }
+                    if($imgFlag == 1){                        
+                        continue;
+                    }                    
+
                     /** create folder if it is not exists */
                     $newFileName = $tmpDir . $imageName;
                     /** read file from URL and copy it to the new destination */
@@ -257,7 +271,8 @@ class IceCatUpdateProduct
                     $this->file->chmod($newFileName, 0777);
                     if ($result) {
                         try{
-                            if ($i == 0) {
+                            $baseImage = $product->getData('image');
+                            if ($i == 0 && (empty($baseImage) || $baseImage == "no_selection")) {
                                 $product->addImageToMediaGallery($newFileName, ['image', 'small_image', 'thumbnail'], false, false);
                             } else {
                                 $product->addImageToMediaGallery($newFileName, [], false, false);
@@ -276,6 +291,7 @@ class IceCatUpdateProduct
             $productMultiMediaData = $productData['Multimedia'];
             if (count($productMultiMediaData) > 0) {
                 $count = 1;
+                $productMedia = $product->getMediaGalleryImages();
                 foreach ($productMultiMediaData as $multiMediaData) {
                     if ($multiMediaData['IsVideo']) {
                         if (strpos($multiMediaData['URL'], 'youtube') !== false) {
@@ -296,6 +312,23 @@ class IceCatUpdateProduct
                                 ];
     
                                 // Add video to the product
+
+                                // Skip Duplicate Video Start
+                                $videoFlag = 0; 
+                                foreach ($productMedia as $child) { 
+                                    $mageProdVideoData = $child->getData();
+                                    if (isset($mageProdVideoData['media_type']) && $mageProdVideoData['media_type'] == 'external-video') {
+                                        if ($mageProdVideoData['video_url'] == $videoUrl) {
+                                            $videoFlag = 1;                            
+                                            continue;
+                                        } 
+                                    }
+                                }
+                                if($videoFlag == 1){                        
+                                    continue;
+                                } 
+                                // Skip Duplicate Video End
+
                                 $mediaTmpDiretory = $this->getMediaDirTmpDir();
                                 if ($product->hasGalleryAttribute()) {
                                     $videoName = $this->videoGalleryProcessor->addVideo(
