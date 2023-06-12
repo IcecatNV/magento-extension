@@ -162,7 +162,6 @@ class IceCatUpdateProduct
                     endif;
                     $reasonsHtml .= '</div>';
                 }
-                $reasonsHtml .= '</div>';
                 $product->setData(AttributeCodes::ICECAT_PRODUCT_ATTRIBUTE_REASON_TO_BUY, $reasonsHtml);
             } else {
                 $product->setData(AttributeCodes::ICECAT_PRODUCT_ATTRIBUTE_REASON_TO_BUY, '');
