@@ -419,9 +419,9 @@ class Queue
                         foreach ($storeArray as $store) {
                             $product = $this->productRepository->getById($productId, false, $store);
                             $language = $this->data->getStoreLanguage($store);
-                            $icecatUri = $this->data->getIcecatUri($product, $language);
-                            if ($icecatUri) {                                
-                                $response = $this->icecatApiService->execute($icecatUri);
+                            $icecatQuery = $this->data->getIcecatQuery($product, $language);
+                            if ($icecatQuery) {                                
+                                $response = $this->icecatApiService->execute($icecatQuery);
                                 $responseArray[$store] = $response;
                                 if (!empty($response) && !empty($response['Code'])) {
                                     $errorMessage       = $this->errorMessageResponse($response, $product);
