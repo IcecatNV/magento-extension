@@ -42,9 +42,9 @@ class IcecatApiService
      * @param $icecatUri
      * @return array
      */
-    public function execute($icecatUri): array
+    public function execute(array $icecatQuery): array
     {
-        $response = $this->doRequest($icecatUri);
+        $response = $this->doRequest('', ['query'=> $icecatQuery]);
         $responseBody = $response->getBody();
         return json_decode($responseBody->getContents(), true);
     }
@@ -71,9 +71,10 @@ class IcecatApiService
         $userType = $this->data->getUserType();
         
         if($userType == 'full' && !empty($this->data->getAppKey())) {
-            $uriEndpoint = $uriEndpoint . '&app_key=' . $this->data->getAppKey();
+            $params['query']['app_key'] = $this->data->getAppKey();
         }
-        $uriEndpoint = $uriEndpoint . '&PlatformName=Magento2OpensourceExtension&PlatformVersion=V2';
+        $params['query']['PlatformName'] = 'Magento2OpensourceExtension';
+        $params['query']['PlatformVersion'] = 'V2';
 
         $params['headers'] = [
             'api-token' => $this->data->getAccessToken()
