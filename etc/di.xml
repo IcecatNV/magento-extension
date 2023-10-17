@@ -9,4 +9,18 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="icecat_queue_report_listing_data_source" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueue\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="icecat_queue_log_report_listing_data_source" xsi:type="string">Icecat\DataFeed\Model\ResourceModel\IcecatDatafeedQueueLog\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
