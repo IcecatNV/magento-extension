@@ -65,7 +65,8 @@
             "error_log": true,
             "data_size": true,
             "created": true,
-            "locked_at": true
+            "locked_at": true,
+            "schedule_unique_id": true
         },
         "constraint": {
             "PRIMARY": true
@@ -83,7 +84,8 @@
             "product_ids": true,
             "product_ids_with_missing_gtin_product_code": true,
             "ended": true,
-            "error_log": true
+            "error_log": true,
+            "schedule_unique_id": true
         },
         "constraint": {
             "PRIMARY": true
@@ -96,6 +98,26 @@
             "data": true,
             "error_log": true,
             "data_size": true,
+            "created_at": true,
+            "schedule_unique_id": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "icecat_queue_scheduler": {
+        "column": {
+            "id": true,
+            "started": true,
+            "ended": true,
+            "type": true,
+            "status": true,
+            "product_updated": true,
+            "product_failed": true,
+            "queue_mode": true,
+            "cron_expression": true,
+            "cron_run_time": true,
+            "schedule_unique_id": true,
             "created_at": true
         },
         "constraint": {
