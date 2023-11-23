@@ -217,11 +217,9 @@ class CreateProductAttribute implements DataPatchInterface, PatchRevertableInter
         $this->moduleDataSetup->getConnection()->startSetup();
 
         // Deleting category
-        /* $connection = $this->moduleDataSetup->getConnection();
+        $connection = $this->moduleDataSetup->getConnection();
         $table = $connection->getTableName('core_config_data');
-        $category = $connection->getConnection()
-            ->query('SELECT value FROM ' . $table . ' WHERE path = "datafeed/icecat/root_category_id"')
-            ->fetch(); */
+        $category = $connection->query('SELECT value FROM ' . $table . ' WHERE path = "datafeed/icecat/root_category_id"')->fetch();
         $categoryId = $this->_scopeConfig->getValue('datafeed/icecat/root_category_id', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
         if (!empty($categoryId)) {
             //$categoryId = $category['value'];
@@ -239,18 +237,14 @@ class CreateProductAttribute implements DataPatchInterface, PatchRevertableInter
                     $subCategory->delete();
                 }
             }
+        $this->categoryRepository->deleteByIdentifier($categoryId);
         }
 
-        $this->categoryRepository->deleteByIdentifier($categoryId);
-        $connection->getConnection()
-            ->query('Delete FROM ' . $table . ' WHERE path like "%datafeed%"')
-            ->fetch();
+        $connection->query('Delete FROM ' . $table . ' WHERE path like "%datafeed%"')->fetch();
 
         // Deleting patch data from patch_list table
         $patchTable = $connection->getTableName('patch_list');
-        $connection->getConnection()
-            ->query('Delete FROM ' . $patchTable . ' WHERE patch_name like "%Icecat%"')
-            ->fetch();
+        $connection->query('Delete FROM ' . $patchTable . ' WHERE patch_name like "%Icecat%"')->fetch();
 
         /** @var EavSetup $eavSetup */
         $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
