@@ -36,6 +36,8 @@ class IceCatUpdateProduct
     private File $file;
     private $moduleDataSetup;
     public $globalMediaArray;
+    private $resultRedirect;
+    private $_scopeConfig;
 
     /**
      * @param ProductResourceModel $productResource
@@ -104,7 +106,7 @@ class IceCatUpdateProduct
         $product->setData('icecat_icecat_id', $response['data']['GeneralInfo']['IcecatId']);
 
         $attributeForMapping = $this->data->getProductAttributes();
-        
+
         $productData = $response['data'];
         if (!empty($attributeForMapping)) {
             $attributeArray = [];
@@ -162,6 +164,7 @@ class IceCatUpdateProduct
                     endif;
                     $reasonsHtml .= '</div>';
                 }
+                $reasonsHtml .= '</div>';
                 $product->setData(AttributeCodes::ICECAT_PRODUCT_ATTRIBUTE_REASON_TO_BUY, $reasonsHtml);
             } else {
                 $product->setData(AttributeCodes::ICECAT_PRODUCT_ATTRIBUTE_REASON_TO_BUY, '');
@@ -228,7 +231,7 @@ class IceCatUpdateProduct
             }
         }
 
-        
+
         if ($this->data->isImportImagesEnabled()) {
             $productImageData = $productData['Gallery'];
             if (count($productImageData) > 0) {
@@ -241,27 +244,27 @@ class IceCatUpdateProduct
                     $tmpDir = $this->getMediaDirTmpDir();
                     $imageName = $product->getId() . '_' . $storeId . '_' . baseName($image);
                     $imageNameWithoutExtension = substr($imageName, 0, strrpos($imageName, '.'));
-                    if (!in_array($imageName, $oldImageName)) { 
+                    if (!in_array($imageName, $oldImageName)) {
                         $oldImageName[] = $imageName;
                     } else {
                         continue;
                     }
-                    $imgFlag = 0; 
-                    foreach ($images as $child) {                        
+                    $imgFlag = 0;
+                    foreach ($images as $child) {
                         if (strpos($child->getFile(), $imageNameWithoutExtension) !== false) {
-                            $imgFlag = 1;                            
+                            $imgFlag = 1;
                             continue;
-                        } 
+                        }
                     }
-                    if($imgFlag == 1){                        
+                    if($imgFlag == 1){
                         continue;
-                    }                    
+                    }
 
                     /** create folder if it is not exists */
                     $newFileName = $tmpDir . $imageName;
                     /** read file from URL and copy it to the new destination */
                     if ($userType == 'full' && !empty($contentToken)) {
-                        $result = $this->file->read($image. '?content_token=' .$contentToken, $newFileName);     
+                        $result = $this->file->read($image. '?content_token=' .$contentToken, $newFileName);
                     } else {
                         $result = $this->file->read($image, $newFileName);
                     }
@@ -309,23 +312,23 @@ class IceCatUpdateProduct
                                     'thumbnail_url' => ($multiMediaData['ThumbUrl'] ? $multiMediaData['ThumbUrl']: $multiMediaData['PreviewUrl']),
                                     'store_id' => $storeId
                                 ];
-    
+
                                 // Add video to the product
 
                                 // Skip Duplicate Video Start
-                                $videoFlag = 0; 
-                                foreach ($productMedia as $child) { 
+                                $videoFlag = 0;
+                                foreach ($productMedia as $child) {
                                     $mageProdVideoData = $child->getData();
                                     if (isset($mageProdVideoData['media_type']) && $mageProdVideoData['media_type'] == 'external-video') {
                                         if ($mageProdVideoData['video_url'] == $videoUrl) {
-                                            $videoFlag = 1;                            
+                                            $videoFlag = 1;
                                             continue;
-                                        } 
+                                        }
                                     }
                                 }
-                                if($videoFlag == 1){                        
+                                if($videoFlag == 1){
                                     continue;
-                                } 
+                                }
                                 // Skip Duplicate Video End
 
                                 $mediaTmpDiretory = $this->getMediaDirTmpDir();
@@ -365,8 +368,8 @@ class IceCatUpdateProduct
                         $pdfName        = end($pdfNameArray);
                         /** create folder if it is not exists */
                         /** @var string $newFileName */
-                        $newFileName    = $destinationPath . baseName($pdf);    
-                        
+                        $newFileName    = $destinationPath . baseName($pdf);
+
                         if($userType == 'full' && !empty($contentToken)){
                             $result = $this->file->read($pdf.'?content_token='. $contentToken, $newFileName);
                         }else{
@@ -645,7 +648,7 @@ class IceCatUpdateProduct
             ->query('SELECT value FROM ' . $table . ' WHERE path = "datafeed/icecat/root_category_id"')
             ->fetch();
         $parentId   = $category['value'];
-        
+
         $parentCategory = $this->categoryFactory->create()->load($parentId);
 
         $category = $this->categoryFactory->create();
@@ -653,7 +656,7 @@ class IceCatUpdateProduct
             ->addAttributeToFilter('icecat_category_id', $categoryId)
             ->addAttributeToFilter('parent_id', $parentId)
             ->getFirstItem();
-             
+
         if (!$category->getId()) {
             $category->setPath($parentCategory->getPath())
                 ->setParentId($parentId)

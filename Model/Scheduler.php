@@ -21,6 +21,7 @@ class Scheduler
      * @var string
      * */
     private $table;
+    private $_scopeConfig;
 
     /**
      * @param ResourceConnection $resourceConnection
@@ -143,7 +144,7 @@ class Scheduler
             ->order('id ASC');
         return $this->db->query($query)->fetch();
     }
-    
+
     public function fetchAutomaticScheduleRecord()
     {
         $query = $this->db->select()
