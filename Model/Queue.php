@@ -101,6 +101,10 @@ class Queue
      * @var Config|ConfigInterface
      */
     private $config;
+    private $schedulerTable;
+    private $_scopeConfig;
+    private $storeManager;
+    private $attributeRepository;
 
     /**
      * @param CollectionFactory $collectionFactory
@@ -177,7 +181,7 @@ class Queue
                 $selectedBrands = $this->_scopeConfig->getValue('datafeed/icecat_brands/multiple_brands', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
                 $selectedBrandsArr = explode(",",$selectedBrands);
                 $collection = $productCollection->addAttributeToSelect($brandAttribute)
-                    ->addFieldToFilter($brandAttribute,['in' => $selectedBrandsArr]); 
+                    ->addFieldToFilter($brandAttribute,['in' => $selectedBrandsArr]);
                 $collection1Ids = array_column($collection->getData(), 'entity_id');
             }
             //Brand Filter Code - END
@@ -218,7 +222,7 @@ class Queue
             $selectedBrands = $this->_scopeConfig->getValue('datafeed/icecat_brands/multiple_brands', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
             $selectedBrandsArr = explode(",",$selectedBrands);
             $collection = $productCollection->addAttributeToSelect($brandAttribute)
-                ->addFieldToFilter($brandAttribute,['in' => $selectedBrandsArr]); 
+                ->addFieldToFilter($brandAttribute,['in' => $selectedBrandsArr]);
             $collection1Ids = array_column($collection->getData(), 'entity_id');
         }
         //Brand Filter Code - END
@@ -300,7 +304,7 @@ class Queue
     public function run($maxJobs, $uniqueScheduledId)
     {
         $authResponse = $this->data->validateToken();
-        if ($authResponse['httpcode'] != "400") 
+        if ($authResponse['httpcode'] != "400")
         {
             $this->clearOldFailingJobs();
             $jobs = $this->getJobs($maxJobs);
@@ -420,23 +424,23 @@ class Queue
                             $product = $this->productRepository->getById($productId, false, $store);
                             $language = $this->data->getStoreLanguage($store);
                             $icecatUri = $this->data->getIcecatUri($product, $language);
-                            if ($icecatUri) {                                
+                            if ($icecatUri) {
                                 $response = $this->icecatApiService->execute($icecatUri);
                                 $responseArray[$store] = $response;
                                 if (!empty($response) && !empty($response['Code'])) {
                                     $errorMessage       = $this->errorMessageResponse($response, $product);
                                     $errorProductIds[]  = $productId;
                                     $errorLog['Product ID-' . $productId] = $errorMessage;
-                                } else {                                    
-                                    $globalMediaArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalMediaArray);                                    
+                                } else {
+                                    $globalMediaArray = $this->iceCatUpdateProduct->updateProductWithIceCatResponse($product, $response, $store, $globalMediaArray);
                                     $globalImageArray = array_key_exists('image', $globalMediaArray) ? $globalMediaArray['image'] : [];
                                     $globalVideoArray = array_key_exists('video', $globalMediaArray) ? $globalMediaArray['video'] : [];
-                                    $successProducts[] = $productId;                                    
+                                    $successProducts[] = $productId;
                                 }
-                            } else {                                
+                            } else {
                                 $productWithOutGtinAndProductCodeAndBrandCode[] = $productId;
                             }
-                        }                        
+                        }
                         if ($this->columnExists === false) {
                             $query = "select * from " . $this->galleryEntitytable . " A left join " . $this->galleryTable . " B on B.value_id = A.value_id where A.row_id=" . $productId . " and B.media_type='image'";
                         } else {
@@ -544,7 +548,7 @@ class Queue
             }
         }
 
-        
+
         if (!empty($product->getData($product_att_code))) {
             $gtin=$product->getData($product_att_code);
         }

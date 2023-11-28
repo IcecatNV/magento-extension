@@ -59,6 +59,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected const XML_PATH_LANGAUGE_CONFIG = 'general/locale/code';
 
     protected const XML_PATH_TIMEZONE = 'general/locale/timezone';
+    private $_scopeConfig;
+    private $attributeRepository;
     /**
      * @param Context $context
      * @param StoreManagerInterface $storeManager
@@ -131,7 +133,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->scopeConfig->getValue(self::XML_PATH_ICECAT_DATAFEED_API_CONTENT_TOKEN);
     }
-    
+
 	/**
      * @return mixed
      */
@@ -174,7 +176,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $brandCode = $this->getBrandCode();
                 $productCodeData = $product->getData($productCode);
                 $brandCodeData = $product->getData($brandCode);
-                
+
                 $attributeType = $this->attributeRepository->get($brandCode)->getFrontendInput();
                 if ($attributeType == 'select') {
                     $brandCodeData  = $product->getAttributeText($brandCode);
@@ -194,7 +196,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if ($attributeType == 'select') {
                 $brandCodeData  = $product->getAttributeText($brandCode);
             }
-            
+
             if (!empty($productCodeData) && !empty($brandCodeData)) {
                 return '?UserName=' . $username . '&Language=' . $language . '&Brand=' . $brandCodeData . '&ProductCode=' . $productCodeData;
             } elseif (!empty($this->getGTINCode())) {
@@ -363,7 +365,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function getUserSessionId()
     {
-        $uid= array( 
+        $uid= array(
             'Login' => $this->getUsername(),
             'Password' => $this->getPassword(),
             'Session' => 'Rest'
@@ -402,7 +404,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $responseMessage = __('Please Enable Module ');
             $response = ['Code'=> 400 ,'Error' => 'Bad Request','Message'=> $responseMessage];
         }
-        
+
         return $response;
     }
 
@@ -433,7 +435,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 return $usertype = 'full';
             } else if($usertype == 5 || $usertype == 6){
                 return $usertype = 'open';
-            }           
+            }
         } else{
             return $usertype;
         }

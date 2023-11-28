@@ -9,6 +9,9 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 class BrandMultiSelect implements ArrayInterface
 {
 	const XML_PATH_ICECAT_CONFIG_BRAND = 'datafeed/product_brand_fetch_type/brand';
+    private $scopeConfig;
+    private $attributeRepository;
+    private $collectionFactory;
 
 	public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
@@ -38,12 +41,12 @@ class BrandMultiSelect implements ArrayInterface
 		       	foreach ($attributeOptions as $key => $attributeOption) {
 		       		if($attributeOption->getValue()!= ''){
 			       		$brandValueOption = ['value' => $attributeOption->getValue(), 'label' => __($attributeOption->getLabel())];
-			   			$brandValueFinalOption[$i] = $brandValueOption;	
-			   			$i++;		       			
+			   			$brandValueFinalOption[$i] = $brandValueOption;
+			   			$i++;
 		       		}
 		       	}
 		   	} else {
-				
+
 				$brandValueArray = [];
 				foreach ($collection as $key => $collections) {
 					$brandValueArray[$collections[$brandAttributeCode]] = $collections[$brandAttributeCode];

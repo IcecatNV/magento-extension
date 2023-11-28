@@ -19,7 +19,7 @@ class ConfigPatch implements SchemaPatchInterface
      * @var ModuleDataSetupInterface
      */
     private $moduleDataSetup;
-    protected $scopeConfig;
+    protected $_scopeConfig;
     private $defaultConfigData = [
         'datafeed/general/enable' => 0,
         'datafeed/product_attributes/icecat_categorization/status' => '0',
@@ -122,14 +122,17 @@ class ConfigPatch implements SchemaPatchInterface
         }
 
         $this->moduleDataSetup->getConnection()->endSetup();
+
+        return $this;
     }
 
     private function serializeDefaultArrayConfigData()
     {
-        $serializeMethod = 'json_encode';
+        // $serializeMethod = 'json_encode';
 
         foreach ($this->defaultArrayConfigData as $path => $array) {
-            $this->defaultArrayConfigData[$path] = $serializeMethod($array);
+            // $this->defaultArrayConfigData[$path] = $serializeMethod($array);
+            $this->defaultArrayConfigData[$path] = json_encode($array);
         }
     }
 

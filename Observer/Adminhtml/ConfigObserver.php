@@ -9,6 +9,8 @@ use Icecat\DataFeed\Model\Config\Source\UserType;
 
 class ConfigObserver implements ObserverInterface
 {
+    private $data;
+    private $userType;
 
     public function __construct(
     	Data $data,
@@ -20,7 +22,7 @@ class ConfigObserver implements ObserverInterface
 
     public function execute(EventObserver $observer)
     {
-        $subscriptionLevel = $this->data->getUserType();     
+        $subscriptionLevel = $this->data->getUserType();
         if (!empty($subscriptionLevel) && $subscriptionLevel == 'full') {
             $this->userType->setUserTypeValue(1);
         } else if (!empty($subscriptionLevel) && $subscriptionLevel == 'open') {

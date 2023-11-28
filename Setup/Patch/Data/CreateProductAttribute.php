@@ -48,7 +48,7 @@ class CreateProductAttribute implements DataPatchInterface, PatchRevertableInter
      */
     private $config;
     private CategoryRepository $categoryRepository;
-    protected $scopeConfig;
+    private $_scopeConfig;
 
     /**
      * @param ModuleDataSetupInterface $moduleDataSetup

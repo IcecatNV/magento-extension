@@ -4,6 +4,8 @@ namespace Icecat\DataFeed\Observer\Adminhtml;
 
 class LayoutHandler implements \Magento\Framework\Event\ObserverInterface
 {
+    private $request;
+
     public function __construct(\Magento\Framework\App\Request\Http\Proxy $request)
     {
         $this->request = $request;
@@ -15,7 +17,7 @@ class LayoutHandler implements \Magento\Framework\Event\ObserverInterface
 
         if (! empty($params['section'])) {
             $moduleName = $this->getModuleName();
-            if ($params['section'] == "datafeed") { 
+            if ($params['section'] == "datafeed") {
                 $layout = $observer->getData('layout');
                 $layout->getUpdate()->addHandle('adminhtml_system_config_edit_section_icecat_config_handler');
             }
